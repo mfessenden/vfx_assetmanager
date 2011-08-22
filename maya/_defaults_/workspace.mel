@@ -1,0 +1,64 @@
+//Maya 2009 Project Definition
+
+workspace -fr "scene" "OTHERS/";
+workspace -fr "mayaAscii" "OTHERS/";
+workspace -fr "mayaBinary" "OTHERS/";
+
+workspace -fr "movie" "OTHERS/data/";
+workspace -fr "offlineEdit" "OHTERS/edits/";
+workspace -fr "autoSave" "OTHERS/autosave/";
+
+workspace -fr "3dPaintTextures" "PAINTINGS/TEXTURES/";
+workspace -fr "textures" "PAINTINGS/TEXTURES/";
+
+workspace -fr "particles" "OTHERS/particles/";
+workspace -fr "renderScenes" "LIGHTING/";
+workspace -fr "lights" "RENDERED_IMAGES/renderData/shaders/";
+
+workspace -fr "diskCache" "OTHERS/data/";
+
+workspace -fr "furShadowMap" "OTHERS/fur/furShadowMap/";
+workspace -fr "furFiles" "OTHERS/fur/furFiles/";
+workspace -fr "furAttrMap" "OTHERS/fur/furAttrMap/";
+workspace -fr "furImages" "OTHERS/fur/furImages/";
+workspace -fr "furEqualMap" "OTHERS/fur/furEqualMap/";
+
+workspace -fr "image" "RENDERED_IMAGES/";
+workspace -fr "images" "RENDERED_IMAGES/";
+workspace -fr "mentalray" "RENDERED_IMAGES/renderData/mentalRay/";
+workspace -fr "mentalRay" "RENDERED_IMAGES/renderData/mentalRay/";
+workspace -fr "iprImages" "RENDERED_IMAGES/renderData/iprImages/";
+workspace -fr "depth" "RENDERED_IMAGES/renderData/depth/";
+
+workspace -fr "animImport" "OTHERS/data/";
+workspace -fr "animExport" "OTHERS/data/";
+workspace -fr "clips" "OTHERS/clips/";
+
+workspace -fr "templates" "OTHERS/assets/";
+
+workspace -fr "audio" "EDIT/SOUND/";
+
+workspace -fr "sourceImages" "PAINTINGS/TEXTURES/";
+
+workspace -fr "mel" "OTHERS/mel/";
+
+workspace -fr "Adobe(R) Illustrator(R)" "OTHERS/data/";
+workspace -fr "aliasWire" "OTHERS/data/";
+workspace -fr "DAE_FBX" "OTHERS/data/";
+workspace -fr "DAE_FBX export" "OTHERS/data/";
+workspace -fr "DXF_FBX" "OTHERS/data/";
+workspace -fr "DXF_FBX export" "OTHERS/data/";
+workspace -fr "DXF" "OTHERS/data/";
+workspace -fr "DXF export" "OTHERS/data/";
+workspace -fr "EPS" "OTHERS/data/";
+workspace -fr "FBX" "OTHERS/data/";
+workspace -fr "FBX export" "OTHERS/data/";
+workspace -fr "IGES" "OTHERS/data/";
+workspace -fr "IGESexport" "OTHERS/data/";
+workspace -fr "move" "OTHERS/data/";
+workspace -fr "OBJ" "OTHERS/data/";
+workspace -fr "OBJexport" "OTHERS/data/";
+workspace -fr "RIBexport" "OTHERS/data/";
+workspace -fr "RIB" "OTHERS/data/";
+
+getenv
