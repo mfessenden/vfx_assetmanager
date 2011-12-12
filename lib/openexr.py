@@ -1,7 +1,34 @@
+# openexr.py by Michael Fessenden (c) 2011
+#
+# v0.31
+#
+# Description :
+# -------------
+# This module deals with OpenEXR files and examining their contents
+#
+#
+# Version History :
+# -----------------
+#
+# v0.32:
+# - development version
+#
+# TODO List :
+# -----------
+# - 
+# ----------------------------------------------------------------------------
+
 import OpenEXR
 import Imath
 #import Image
 import sys
+
+__version__ = '0.32'
+__lastupdate__ = 'Dec 08 2011'
+__repr__ = 'assetmanager.lib.openexr'
+__amlib__ = 'openexr'
+namespace = __name__
+__status__ = 'development'
 
 def main(exrfile, jpgfile):
     file = OpenEXR.InputFile(exrfile)
@@ -25,9 +52,7 @@ if __name__ == "__main__":
         print "usage: exr2jpg <exrfile> <jpgfile>"
     main(sys.argv[1], sys.argv[2])
     
-    
-    
-    
+
 #channels = OpenEXR.InputFile('file.exr').header('channels')
 
 def returnEXRChannels(img):

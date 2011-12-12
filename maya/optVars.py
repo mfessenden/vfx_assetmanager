@@ -1,6 +1,6 @@
 # optVars.py by Michael Fessenden (c) 2011
 #
-# v0.28
+# v0.30
 #
 # Description :
 # -------------
@@ -10,7 +10,7 @@
 #
 # Version History :
 # -----------------
-# v0.28:
+# v0.32:
 # - development version
 # v0.18:
 # - added the UI function
@@ -34,9 +34,10 @@
 #===============================================================================
 
 import maya.cmds as mc
-__version__ = '0.28'
-__lastupdate__ = 'Jul 15 2011'
+__version__ = '0.32'
+__lastupdate__ = 'Dec 09 2011'
 __amlib__ = 'optVars'
+__status__ = 'design'
 
 
 def am2_optVars():

@@ -1,6 +1,6 @@
 # mainUI.py by Michael Fessenden (c) 2011
 #
-# v0.28
+# v0.33
 #
 # Description :
 # -------------
@@ -13,177 +13,408 @@
 #
 # Version History :
 # -----------------
-# v0.29:
-# - development version 
+# v0.32:
+# - changes to the signal/slot pyqt calls
 #
-# v0.16:
+# v0.31:
+# - added new PyQt interface
 # 
+# v0.30:
+# - Python port of MEL UI 
+#
 #
 # TODO List :
-# -----------
-# -
+# - read the categories from the studio prefs
+# - fix the naming of the AssetManagerUI methods to be consistent...some are based on PyQt actions, others the building of UI elements
 # ----------------------------------------------------------------------------
 
 import maya.cmds as mc
-import sys
-from assetmanager.database import returnAllShows, returnAllAssets, queryShow
+from PyQt4 import QtGui, QtCore, uic
+import os, sys, sip
+import posixpath as pp
+import maya.OpenMayaUI as omui
+
+from assetmanager.lib.ui.QColorScheme import QColorScheme
+
+# assetManager functions
+from assetmanager.lib import shows
+from assetmanager.lib import assets
+from assetmanager.lib.users import UserObj
+from assetmanager.lib.system import Output, UserPrefs, returnLoadedModules
 from assetmanager.lib.shows import ShowObj
-from assetmanager.lib.am_os import returnUsername, sprint, sprint, outprint, dprint
-from assetmanager.maya.assets import AssetsTab
-from assetmanager.maya.system import buildSystemTab
-from assetmanager.maya.proj import returnCurrentProject
-from assetmanager.maya.browser import buildBrowserTab
-from assetmanager.maya.console import buildConsoleTab, updateConsoleOutput
+from assetmanager.lib.sql import Query
 
-__version__ = '0.29'
-__lastupdate__ = 'Aug 09 2011'
+__version__ = '0.33'
+__lastupdate__ = 'Dec 11 2011'
 __repr__ = 'assetManagerUI'
+__status__ = 'production'
+__appname__ = 'assetManager'
 
-# remove the system optionVars so that they are regenerated each time
-#mc.optionVar(remove=('am2_lib_modules') )
-#mc.optionVar(remove=('am2_lib_libraries') )
-
-# declare the variables - eventually to be moved to a different module
-shows = returnAllShows()
-topMenus = ['File', 'Assets','Model', 'Materials', 'Shots','Camera', 'Admin']
-AdminMenu = [('Reset optionVars', 'resetOptVars'),('Display optionVars','optionVarsUI'), ('Toggle debug', 'toggleDebug'), ('Toggle system output', 'toggleSysOut')]
-
-user = returnUsername()
-proj = returnCurrentProject()
-
-def am_createHelpLine():
-    # call with 'doc = assetManagerUI.__doc__'
-    ''' builds the assetManager help line at the bottom of the UI'''
-    # help line form
-    am_helpForm = mc.formLayout ('am_helpForm',  parent= 'am_paneLayout', numberOfDivisions = 100)
-    am_helpLeftFrame = mc.frameLayout( 'am_helpLeftFrame', parent='am_helpForm', height=20,  borderStyle='in', labelVisible=0 )
-    am_helpLeftText = mc.text( 'am_helpLeftText', parent='am_helpLeftFrame', font='fixedWidthFont', align='left', label=('Project: '+proj) )
-    am_helpRightFrame = mc.frameLayout( 'am_helpRightFrame', parent='am_helpForm',  height=20, borderStyle='in', labelVisible=0 )
-    am_helpRightText = mc.text( 'am_helpRightText', parent='am_helpRightFrame', font='fixedWidthFont', align='left', label=('User: ' + user) )
-   
-    # edit the helpLine formLayout
-    mc.formLayout(am_helpForm, edit=True, attachForm=[
-                (am_helpLeftFrame, 'left', 2),
-                (am_helpLeftFrame, 'bottom', 2),
-                (am_helpRightFrame, 'bottom', 2),
-                (am_helpRightFrame, 'right', 2),
-                (am_helpLeftFrame, 'top', 2),
-                (am_helpRightFrame, 'top', 2),
-                (am_helpRightFrame, 'right', 2)],
-          attachPosition=[
-              (am_helpLeftFrame, 'right', 2, 75),
-              (am_helpRightFrame, 'left', 2, 76),
-              (am_helpRightFrame, 'right', 2, 100)])
-    
-    return am_helpForm
+import __builtin__
+__builtin__.am_mods.append(__name__ + ' - (' + __status__ + '  v' + __version__ + ')\n' + __file__ + '\n\n' )
 
 
-def assetManagerUI():
-    ''' main UI function for assetmanager'''
-    func = __repr__
-    ver = __version__
-    winTitle = func + ' - v' + ver
-    
-    thisFunc = sys._getframe().f_code.co_name
-    ''' builds the assetManager main UI'''
-    if mc.window('am_mainWin', exists=True):
-        mc.deleteUI('am_mainWin', window=True)
-    if mc.windowPref('am_mainWin', exists=True):
-        mc.windowPref('am_mainWin', remove=True)
-    am_mainWin = mc.window('am_mainWin', title = winTitle, width=550, height=800)
-    am_topMenu = am_createTopMenu(am_mainWin)
-    
-    # dock the UI
-    if mc.dockControl('am_mainWinDock', exists=True):
-        mc.deleteUI('am_mainWinDock')
-    allowedAreas = ['right', 'left']
-    am_mainWinDock =mc.dockControl('am_mainWinDock', area='left', floating = True, content=am_mainWin, allowedArea=allowedAreas, label = winTitle )
+global winTitle
+winTitle = (__appname__ + ' v' + __version__ + ' (' + __lastupdate__ + ' - ' + __status__ + ')')
 
-    #, paneSize=[(1, 100, 20), (2, 100, 60), (3, 100, 20)]
-    mc.paneLayout('am_paneLayout',configuration = 'horizontal3', shp=3, paneSize=[(1, 100, 8), (2, 87, 60), (3, 100, 4)],smc=resizeMainPane)
-    mc.frameLayout('am_showsMenu_frameLayout',  label='Shows Menu', labelVisible=False, height=60)
-    #adding the 'adjustable' attribute to the first column of the rowLayout seemed to activate the alignment
-    mc.rowLayout('am_showsMenuRow',nc=3, cw3=[125, 125, 300], cl3=['right', 'left', 'left'], ad3=1)
-    mc.text(parent='am_showsMenuRow', label='Shows:', align='right')
-   
-   # build the shows menu
-    am_showsMenu = mc.optionMenu('am_showsMenu', parent='am_showsMenuRow')
-    for show in shows:
-        mc.menuItem(label=show)
-    mc.image(parent='am_showsMenuRow', image='C:/Users/michael/workspace/assetmanager/icons/assetmgr2011.png')
-    
-    
-    am_win_mainTabLayout = mc.tabLayout('am_win_mainTabLayout', parent='am_paneLayout', changeCommand = tabSelect)
-    
-    # only call the class here because we are referencing the ui method below (which calls 'create')
-    assetsMainTab = AssetsTab()
-    mc.optionMenu('am_showsMenu', edit = True, changeCommand = assetsMainTab.update)
-    assetsMainTab.update()
-    
-    # build the tabs
-    browserTab = buildBrowserTab(am_win_mainTabLayout)
-    consoleTab = buildConsoleTab(am_win_mainTabLayout)    
-    systemTab = buildSystemTab(am_win_mainTabLayout)
-    
-    mc.tabLayout('am_win_mainTabLayout', edit=True, tabLabel=( (assetsMainTab.ui, 'Assets'), (browserTab, 'Search'), (systemTab, 'System'), (consoleTab, 'Console')))
-    updateConsoleOutput()
-    
-    am_helpLine = am_createHelpLine()
-    
-    mc.showWindow()
-    mc.dockControl('am_mainWinDock', edit=True, floating=True)
-    selTab = ''
-    if mc.optionVar(exists='am_ui2_curTab'):
-        selTab = mc.optionVar(query = 'am2_ui_curTab')
-        mc.tabLayout( 'am_mainTab', edit=True, st = selTab, )
+am_loc = os.environ['ASSET_MANAGER_LOC']
+uiFile = pp.join(am_loc, 'assetmanager', 'ui', 'common', 'mayaUI.ui')
+
+
+# TODO: this will eventually be pulled from the studio prefs
+categories = ['actor', 'props', 'env', 'assembly']
+global currentAssetClasses
+showObj = ShowObj()
+
+showNames = showObj.showNames
+
+def getMayaMainWindow():
+    """Get the Maya main window as a QmainWindow instance"""
+    parentWindow = omui.MQtUtil.mainWindow()
+    return sip.wrapinstance(long(parentWindow), QtCore.QObject)
+
+#Load the ui file into the form class
+form_class, base_class = uic.loadUiType(uiFile)
+
+class AssetManagerUI(base_class, form_class):
+    """
+    Class: AssetManagerUI
+        
+        Builds the Maya main assetmanager UI
+            
+        USAGE
+            
         
 
-def am_createTopMenu(parent):
-    if mc.menuBarLayout('am_topMenu', exists=True):
-        mc.deleteUI('am_topMenu')
-    am_topMenu = mc.menuBarLayout('am_topMenu', parent = parent)\
+    """
+    openWin = 0
     
-    for topMenu in topMenus:
-        menuItems = []
-        mc.menu(label = topMenu, parent = am_topMenu)
-        if topMenu == 'Admin':
-            menuitems = AdminMenu
+    def __init__(self, parent= getMayaMainWindow()):
+        '''A custom window with a demo set of ui widgets'''
         
-        if menuItems:
-            for mi in menuitems:
-                mc.menuitem(label = mi[0], command = mi[1])
+        AssetManagerUI.openWin += 1
+        
+        super(base_class, self).__init__(parent)
+        #uic adds a function to our class called setupUi, calling this creates all the widgets from the .ui file
+        self.setupUi(self)
+        #The following is overwriting what's been setup in the .ui file
+        self.setObjectName('assetmanager')
+        self.setWindowTitle(winTitle)
+        self.show()
+        self.amLogo.pixmap = pp.join(am_loc, 'assetmanager', 'icons', 'vfx-assetmanager_logo-maya.png')
+        #print 'pixmap:', self.amLogo.pixmap
+        # populate the UI
+        
+        # simpler syntax for signal/connect
+        self.assetList.clicked.connect(self.selectAssetList)
+        self.fileList.clicked.connect(self.buildInfoBrowser)
+            
+        self.connect(self.showsMenu, QtCore.SIGNAL('currentIndexChanged(int)'), self.buildCategoriesMenu) # adding QString seems to crash this
+        self.connect(self.categoriesMenu, QtCore.SIGNAL('currentIndexChanged(int)'), self.buildAssetList)
+        
+
+        global currentAssetClasses
+        
+        self.updateUI()
+        
+        
+        
+    def updateUI(self):
+        self.buildShowsMenu()        
+        self.updateConsoleOutput()
+        self.updateProjectTab()
+        self.buildModulesBrowser()
+        #self.buildAssetList()
+        
+
+
+        
+    def buildShowsMenu(self):
+        curShow = ''
+        curIndex = 0
+        try:
+          curShow = os.environ['SHOW']
+        except KeyError:
+          pass        
+        
+        # build a list from the dict returned from shows library
+        for show in showNames:
+            # showID is show[1]
+            self.showsMenu.addItem(show[0], show[1]) # add the current showID to the QComboBox userData
+            if curShow == str(show[0]):
+                curIndex = showNames.index(show)
+                
+        #self.buildCategoriesMenu()
+        self.buildInfoArea('show')
+        
+    def selectAssetList(self):
+        selected = ''
+        currentAsset = ''
+        selitem = self.assetList.selectedItems()
+        if selitem is not None:
+            selected = self.assetList.selectedItems()[0]
+            currentAsset = str(selected.text())
+            
+        if currentAsset:
+            os.environ['AM_CURRENT_ASSET'] = currentAsset
+            self.currentAsset = currentAsset
+            self.updateUI()
+        
+        currentCategory = self.categoriesMenu.currentText()
+        os.environ['AM_CURRENT_ASSET_CATEGORY'] = str(currentCategory)
+        self.currentCategory = currentCategory
+        
+        # build the classMenu        
+        currentID = self.showsMenu.itemData(self.showsMenu.currentIndex() ) 
+        currentID = int(currentID.toPyObject())
+        self.currentShowID = str(currentID) # TODO: declare this earlier?
+        
+        self.classMenu.clear()
+        self.fileList.clear()
+        query = 'select class_model, class_material, class_rig, class_fx from shows where showID = %s' % str(currentID)
+        dbQuery = Query(query)
+        try:
+            showClasses = dbQuery.result
+            for showClass in showClasses:
+                self.classMenu.addItem(showClass)
+        except:
+            pass
+        
+        self.buildFileList()
+
+    
+    def buildFileList(self):
+        """ this builds the file list"""
+        self.fileList.clear()
+        # get the asset name
+        currentAsset = self.currentAsset
+        currentCategory = self.currentCategory
+        currentShowID = self.currentShowID
+        currentClass = self.classMenu.currentText()
+        #filename, filepath, fileID, assetID, submitDate, createdBy, file_desc, file_comments
+        # TODO: whittle this down, we are going to make another DB call in a moment
+        query = ('select filename, fileID from files where asset_base_name = "%s" and showID = %s and asset_category = "%s" and asset_class = "%s"' % (currentAsset, currentShowID, currentCategory, currentClass))
+        dbQuery = Query(query)
+        
+        result = ['(no files found)']
+        #print dbQuery.result, len(dbQuery.result)
+        if len(dbQuery.result):
+            #print dbQuery.result
+            result = [dbQuery.result[0]]
+            self.currentAssetID = str(dbQuery.result[1]) # assetID is the second item in the tuple
+            #print 'assetId: ', self.currentAssetID
+            
+        self.fileList.addItems(result)
+        
+    
+    def buildCategoriesMenu(self):
+        # clear the menu before we populate it
+        self.categoriesMenu.clear()
+        self.fileList.clear()
+        currentShowCategories = []
+        currentShow = self.showsMenu.currentText()
+        currentShowIndex = self.showsMenu.currentIndex()  
+        
+        # get the show ID
+        # query the database
+
+        currentID = self.showsMenu.itemData(self.showsMenu.currentIndex() ) 
+        currentID = int(currentID.toPyObject())
+        
+        os.environ['AM_SHOW_ID'] = str(currentID)
+        os.environ['AM_SHOW'] = str(currentShow)
+        
+        # TODO: use the new Query object to do this
+        query = 'select category_actor, category_prop, category_env, category_tex, category_assem, category_extra from shows where showID = %s' % currentID
+        sqlQuery = Query(query)
+        if sqlQuery.result:
+            for result in sqlQuery.result:
+                if result:
+                    currentShowCategories.append(result)
+        
+        ####
+        
+        for cat in currentShowCategories:
+            # showID is show[1]
+            self.categoriesMenu.addItem(cat) # add the current showID to the QComboBox userData
+
+   
+    def buildAssetList(self):
+        self.assetList.clear()
+        self.fileList.clear()
+        currentAssetCategory = self.categoriesMenu.currentText()
+        
+        # get the current showID
+        #currentID = self.showsMenu.itemData(self.showsMenu.currentIndex() ) # TODO: figure out why this stopped working
+        currentID = self.showsMenu.itemData(self.showsMenu.currentIndex()).toInt()[0]
+
+        
+        # TODO: why is this itemText and not itemData?
+        currentCategory = self.categoriesMenu.itemText(0)
+        currentClass = self.classMenu.itemText(0)
+        
+        #self.currentID = int(currentID.toPyObject()) # TODO: see above, why is this working differently?
+        self.currentID = currentID
+        print self.currentID
+      
+        # get the asset information based on the current show and category
+        query = ('select assetID, asset_base_name from assets where showID = %s and category = "%s"' % (str(self.currentID), currentAssetCategory))
+        sqlObj = Query(query)
+        queryResult = sqlObj.result
+        assetListTmp = []
+        if queryResult:
+            for result in queryResult:
+                assetListTmp.append(result[1])
+
+        # add it to the assetList        
+        qlist = QtCore.QStringList(map(QtCore.QString, assetListTmp))
+        
+        # need to add the assetID here as well as the name of the asset
+        self.assetList.addItems(qlist)
+     
+     
+    def buildModulesBrowser(self):
+        """ searches for loaded modules and adds them to the system tab"""
+        amLoc = os.environ['ASSET_MANAGER_LOC']
+        result = []
+        for mod in __builtin__.am_mods:
+            mod = mod.replace('\\', '/')
+            result.append(mod)
+            
+        lines = ''.join(result)
+        self.moduleList.setPlainText(lines)
+           
+    def buildInfoBrowser(self):
+        if self.currentAssetID:
+            selected = ''
+            currentFile = ''
+            
+            # get the result of the selected item in the file list
+            selitem = self.assetList.selectedItems()
+            if selitem is not None:
+                selected = self.fileList.selectedItems()[0]
+                currentFileName = str(selected.text())
+                
+
+            filename = self.currentAsset
+            query = 'select  filepath, assetID, submitDate, submitfile, createdBy, file_desc, file_comments from files where fileID = %s' % self.currentAssetID
+            desc = ['File:' ]
+            dbQuery = Query(query)
+            info = dict()
+            try:
+                filename = pp.join(dbQuery.result[0], currentFileName)
+                self.currentFile =  filename
+                info['File'] = filename
+            except:
+                pass
+            for res in dbQuery.result:
+                if type(res) == 'datetime.datetime':
+                    info['Date'] = res
+                
+                #print res, ',', type(res)
+        
+        print info
+        browserText = ''.join(info)
+        self.assetsInfo.setPlainText(browserText)
+        #cursor.close()
+        
+    #===========================================================================
+    #     PROJECT TAB
+    #===========================================================================
+
+    def updateProjectTab(self):
+        curShow = ''
+        curSeq = ''
+        curShot = ''
+        
+        try:
+            curShow = os.environ['SHOW']
+            curSeq = os.environ['SEQ']
+            curShot = os.environ['SHOT']
+        except KeyError:
+            pass
+        
+       
+        # query the database
+        show = shows.ShowObj(curShow, shot=curShot)
+
+        try:
+            if show.showRoot:
+                self.showRootText.setText(show.showRoot)
+                os.environ['SHOW_ROOT'] = show.showRoot 
+            if show.showShotRoot:
+                self.showShotRootText.setText(show.showShotRoot)
+                os.environ['SHOW_SHOT_ROOT'] = show.showShotRoot
+
+            if show.shotCompRoot:
+                self.shotCompRootText.setText(show.shotCompRoot)
+                os.environ['SHOT_COMP_ROOT'] = show.shotCompRoot
+        except AttributeError:
+            #out = Output(('no current shot environment variable set, skipping path resolution for shotCompRoot'), sev='warn')
+            self.shotCompRootText.setText('')
+            
+        try:
+            if show.shotRenderRoot:
+                self.shotRenderRootText.setText(show.shotRenderRoot)
+                os.environ['SHOT_RENDER_ROOT'] = show.shotRenderRoot
+        except AttributeError:
+            #out = Output('no current shot environment variable set, skipping path resolution for shotRenderRoot', sev='warn')
+            self.shotRenderRootText.setText('') 
+       
+        try:
+            if show.trackRoot:
+                self.shotTrackRootText.setText(show.trackRoot)
+                os.environ['SHOT_TRACK_ROOT'] = show.trackRoot
+        except AttributeError:
+            #out = Output('no current shot environment variable set, skipping path resolution for shotTrackRoot', sev='warn')
+            self.shotTrackRootText.setText('')
+               
+        user = UserObj().username
+        role = UserObj().user_role
+        user_os = sys.platform
+        home = os.environ['HOME'] 
+        usrLog = os.environ['AM_USER_LOGS'] 
+        sysLog = os.environ['AM_SYSTEM_LOGS']
+        try:
+            curAssetName = os.environ['AM_CURRENT_ASSET']
+        except:
+            curAssetName = 'no asset selected'
+        amLoc = os.environ['ASSET_MANAGER_LOC']
+        pipelineLib = os.environ['PIPELINE_LIB']
+        pipelineNukeLib = os.environ['PIPELINE_NUKE_LIB']
+        pipelineMayaLib = os.environ['PIPELINE_MAYA_LIB']
+        
+        self.curShowText.setText(curShow)
+        #self.curAssetText.setText(curSeq)
+        self.curUserText.setText(user)  
+        self.curRoleText.setText(role)
+        self.osText.setText(user_os)
+        self.homeText.setText(home) 
+        self.usrLogText.setText(usrLog)
+        self.sysLogText.setText(sysLog)
+        self.curAssetText.setText(curAssetName)
+        self.assetManagerLocTextfield.setText(amLoc)
+        self.pipelineLibTextfield.setText(pipelineLib)
+        self.pipelineNukeLibTextfield.setText(pipelineNukeLib)
+        self.pipelineMayaLibTextfield.setText(pipelineMayaLib)
+        
+    def updateConsoleOutput(self):
+        ''' updates the console tab output area - modified from Nuke'''
+        usr_logs = os.environ['AM_USER_LOGS']
+        usr_output_log = pp.join(usr_logs, 'am_usr_log.txt')
+        
+        try:
+            file = open(usr_output_log , 'r')
+            lines = ''.join(file.readlines())
+            self.consoleList.setPlainText(lines)
+            
+        except IOError:
+            out = Output(('user output log deleted, please contact the administrator'),  sev='err')
+            
+    def buildInfoArea(self, type):
+        """ builds the info area at the bottom of the UI"""
+        if type == 'show':
+            pass
             
             
-    
-def resizeMainPane():
-    mc.paneLayout('am_paneLayout', edit=True, paneSize=[(1, 100, 8), (2, 87, 60), (3, 100, 4)])
-    
-def am_createNewAsset():
-    pass
 
-# query the show menu and look up the current record
-def queryShowsMenu(*args):
-    
-    # clear the TSLs
-    tsls = ['am_assetTab_assetListTSL', 'am_assetTab_assetClassTSL', 'am_assetTab_assetFileTSL']
-    
-    for tsl in tsls:
-        if mc.textScrollList(tsl, exists=True):
-            mc.textScrollList(tsl, edit=True,removeAll=True)
-    
-    '''queries the shows dropdown menu, and builds the rest of the UI'''
-    mc.optionVar( remove='am2_curShow_categories' )
-    
-    curShow = ''
-    if mc.optionMenu('am_showsMenu', exists=True):
-        #mc.deleteUI('am_showsMenu')
-        curShow = str(mc.optionMenu('am_showsMenu', query=True, value = True))        
-    
-    showObject = ShowObj(curShow)
-    mc.optionVar(sv=('am2_ui_curShow', curShow))
-    showData = queryShow(curShow)
-
-    
-def tabSelect():
-    selTab =  mc.tabLayout('am_win_mainTabLayout', query=True, selectTab = True)
-    mc.optionVar(sv=('am2_ui_curTab', selTab))

@@ -1,6 +1,6 @@
 # shots.py by Michael Fessenden (c) 2011
 #
-# v0.29
+# v0.32
 #
 # Description :
 # -------------
@@ -10,7 +10,7 @@
 # Version History :
 # -----------------
 #
-# v0.26:
+# v0.32:
 # - development version
 #
 # TODO List :
@@ -21,10 +21,11 @@
 import maya.cmds as mc
 from assetmanager.lib.am_os import returnLoadedModules, eprint, sprint, outprint, dprint
 
-__version__ = '0.29'
-__lastupdate__ = 'Aug 09 2011'
+__version__ = '0.32'
+__lastupdate__ = 'Dec 09 2011'
 __repr__ = 'shots'
 __amlib__ = 'shots'
+__status__ = 'design'
 
 sprint('building assetManager maya shots tab')
 

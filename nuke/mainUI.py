@@ -1,6 +1,6 @@
 # mainUI.py by Michael Fessenden (c) 2011
 #
-# v0.292
+# v0.32
 #
 # Description :
 # -------------
@@ -9,27 +9,33 @@
 #
 # Version History :
 # -----------------
-# v0.29:
+# v0.32:
 # - development version
+#
+# v0.31:
+# - moved 'returnLoadedModules' to lib/output.py
+#
+# v0.30:
+# - fixed updateElement function to work with the new QtreeWidget
 #
 # TODO List :
 # -----------
+# - add proper size hint functionality for the QTreeWidgets...allow the user to set them and persist
 # - merge all Nuke functions into a separate module so that this UI can be loaded in Maya
 # - get a working compile of OpenEXR Python bindings that will work with Nuke (http://excamera.com/sphinx/articles-openexr.html#openexrpython)
+# - get the show currentID in the updateUI method...easier to find this way (on second thought, that might not be possible)
 # ----------------------------------------------------------------------------
 
 # assetManager functions
 from assetmanager.lib import shows
 from assetmanager.lib import assets
-showNames = shows.returnAllShows()
-from assetmanager.lib.am_os import listFolders, listFiles
-from assetmanager.lib.output import Output
 
+# from assetmanager.lib.output import Output, updatePrefsFile, returnLoadedModules
+from assetmanager.lib.system import Output, UserPrefs, returnLoadedModules
 import MySQLdb as sql
 from assetmanager.lib.users import UserObj 
-from assetmanager.lib.output import Output 
-from assetmanager.nuke.nodes import NukeRead
-from assetmanager.lib.db import Query
+from assetmanager.nuke.nodes import NukeRead, NukeWrite
+from assetmanager.lib.sql import Query
 
 import sys, os
 import posixpath as pp
@@ -37,89 +43,186 @@ import posixpath as pp
 import nuke
 from PyQt4 import QtCore, QtGui, uic
 
-__version__ = '0.292'
-__lastupdate__ = 'Aug 22 2011'
+__version__ = '0.32'
+__lastupdate__ = 'Dec 09 2011'
 __amlib__ = 'mainUI'
+__status__ = 'production'
+__appname__ = 'assetManager'
+
+import __builtin__
+__builtin__.am_mods.append(__name__ + ' - (' + __status__ + '  v' + __version__ + ') - '+ __lastupdate__ +'\n' + __file__ + '\n\n' )
 
 
+global winTitle
+winTitle = (__appname__ + ' v' + __version__ + ' (' + __lastupdate__ + ' - ' + __status__ + ')')
 
-class MainWindow(object):
-    def __init__(self):
+
+showNames = shows.returnAllShows()
+
+global seqIndex
+
+seqIndex = 0
+
+userPrefFile = UserPrefs()
+
+class MainWindow(QtGui.QMainWindow):
+    def __init__(self, parent=None):
+             
+        try:
+            am2_loc = os.environ['ASSET_MANAGER_LOC']
+        except KeyError:
+            out = Output(('"ASSET_MANAGER_LOC" environment variable not set'), sev='err', write=True)
+            
+        uiFile = pp.join(am2_loc, 'assetmanager', 'ui', 'common', 'nukeUI.ui')
+           
+        # Set up the user interface from Designer.
+        global winTitle
+        self.ui = uic.loadUi(uiFile) 
+        nuke.addOnCreate(self.onCreateCallback)
+        self.ui.setWindowTitle(winTitle)
         
-      try:
-          am2_loc = os.environ['ASSET_MANAGER_PY_LOC']
-      except KeyError:
-          out = Output(('"ASSET_MANAGER_PY_LOC" environment variable not set'), sev='err')
-          
-      uiFile = pp.join(am2_loc, 'ui', 'common', 'mainUI.ui')   
-      # Set up the user interface from Designer.
-      self.ui = uic.loadUi(uiFile) 
-      nuke.addOnCreate(self.onCreateCallback)
-      self.ui.connect(self.ui.showsMenu, QtCore.SIGNAL('currentIndexChanged(int)'), self.buildSeqMenu) # adding QString seems to crash this
-      self.ui.connect(self.ui.seqMenu, QtCore.SIGNAL('currentIndexChanged(int)'), self.buildShotsList) # adding QString seems to crash this
+        self.ui.connect(self.ui.showsMenu, QtCore.SIGNAL('currentIndexChanged(int)'), self.buildSeqMenu) # adding QString seems to crash this
+        self.ui.connect(self.ui.seqMenu, QtCore.SIGNAL('currentIndexChanged(int)'), self.buildShotsList) # adding QString seems to crash this
+        
+        self.ui.connect(self.ui.shotsMenu, QtCore.SIGNAL('currentIndexChanged(int)'), self.buildElementsList) 
+        self.ui.connect(self.ui.shotsMenu, QtCore.SIGNAL('currentIndexChanged(int)'), self.buildFilesList)
+        self.ui.connect(self.ui.elementDetailTree, QtCore.SIGNAL("itemClicked(QTreeWidgetItem*,int)"), self.formatElementInfo)
+        self.ui.connect(self.ui.fileDetailTree, QtCore.SIGNAL("itemClicked(QTreeWidgetItem*,int)"), self.formatFileInfo)
+        
+        
+        # TODO: fix this so that self.updateElement can pass an argument
+        self.ui.connect(self.ui.updateElementButton, QtCore.SIGNAL('clicked()'), self.updateElement )
+        self.ui.connect(self.ui.loadElementButton, QtCore.SIGNAL('clicked()'), self.loadElement )
+        self.ui.connect(self.ui.loadFileButton, QtCore.SIGNAL('clicked()'), self.loadFile )
+        self.ui.connect(self.ui.importFileButton, QtCore.SIGNAL('clicked()'), self.importFile )
+        self.ui.connect(self.ui, QtCore.SIGNAL("lastWindowClosed()"), self.ui, QtCore.SLOT("quit()"))
+      
+        self.ui.fileMenu = self.ui.menuBar().addMenu('&File')
 
-      self.ui.connect(self.ui.shotsMenu, QtCore.SIGNAL('currentIndexChanged(int)'), self.buildElementsList) 
-      self.ui.connect(self.ui.shotsMenu, QtCore.SIGNAL('currentIndexChanged(int)'), self.buildFilesList)
-      self.ui.connect(self.ui.elementDetailTree, QtCore.SIGNAL("itemClicked(QTreeWidgetItem*,int)"), self.formatElementInfo)
-      self.ui.connect(self.ui.fileDetailTree, QtCore.SIGNAL("itemClicked(QTreeWidgetItem*,int)"), self.formatFileInfo)
-
-
-      # TODO: fix this so that self.updateElement can pass an argument
-      self.ui.connect(self.ui.updateElementButton, QtCore.SIGNAL('clicked()'), self.updateElement )
-      self.ui.connect(self.ui.loadElementButton, QtCore.SIGNAL('clicked()'), self.loadElement )
-      self.ui.connect(self.ui.loadFileButton, QtCore.SIGNAL('clicked()'), self.loadFile )
-      self.ui.connect(self.ui, QtCore.SIGNAL("lastWindowClosed()"), self.ui, QtCore.SLOT("quit()"))
-
+    
+    
     def showUI(self):
-      self.ui.show()
+        self.ui.show()
+        filename = nuke.root().name()
+        if filename is not 'Root':
+            os.environ['NUKE_LAST_FILE'] = filename
     
     def onCreateCallback(self):
-      n = nuke.thisNode()
+        n = nuke.thisNode()
     
     def buildShowsMenu(self):
+        curShow = ''
+        curIndex = 0
+        try:
+          curShow = os.environ['SHOW']
+        except KeyError:
+          pass        
+        
+        # build a list from the dict returned from shows library
         for show in showNames:
-            ind = int(showNames.index(show))         
-            self.ui.showsMenu.addItem(show[0], show[1]) # add the current showID to the menu
+            # showID is show[1]
+            self.ui.showsMenu.addItem(show[0], show[1]) # add the current showID to the QComboBox userData
+            if curShow == str(show[0]):
+                #print 'setting show index: %s' % curShow
+                curIndex = showNames.index(show)
+        
+            
+        self.ui.showsMenu.setCurrentIndex(curIndex)
+            
 
     def buildSeqMenu(self):
-
+        ''' builds the Sequence UI QComboBox'''
+        global seqIndex
         item = self.ui.seqMenu
         item.clear()
+        
         currentShow = self.ui.showsMenu.currentText()
+        currentShowIndex = self.ui.showsMenu.currentIndex()     
+    
+        curSeq = ''
+        curIndex = ''
         
-        # get the current showID from the userData
-        currentID = self.ui.showsMenu.itemData(self.ui.showsMenu.currentIndex() ) 
-        currentID = int(currentID.toPyObject())
-
-        os.environ['SHOW'] = str(currentShow)
-        db = sql.connect(host='localhost', user='root', db="assets")
-
-        # query the database
-        cursor = db.cursor()
-        cursor.execute('select sequences from shows where showID = %s', currentID)
-        queryResult = cursor.fetchall()
-        cursor.close()
-        
-        seqNames = ['(all)']
-        try:
-            queryResult = queryResult[0][0].rsplit(', ')
-            for qr in queryResult:
-                seqNames.append( qr.rsplit(':')[0])
+        if currentShow:
+            try:
+              curSeq = os.environ['SEQ']
+            except KeyError:
+              pass
+             
             
-            qlist = QtCore.QStringList(map(QtCore.QString, seqNames))
-            self.ui.seqMenu.addItems(qlist) 
-        except AttributeError:
-            out = Output(('show: "%s" has no sequences' % currentShow), sev = 'sys')
-   
-        self.updateProject()
+            # get the current showID from the userData
+            # TODO: move this to the updateUI method...as is used in the Maya UI
+            currentID = self.ui.showsMenu.itemData(self.ui.showsMenu.currentIndex() ) 
+            currentID = int(currentID.toPyObject())
+            
+            os.environ['SHOW_ID'] = str(currentID)
+            os.environ['SHOW'] = str(currentShow)
+            
+            # query the database
+            db = sql.connect(host='localhost', user='root', db="assets")
+    
+            cursor = db.cursor()
+            cursor.execute('select show_sequences from shows where showID = %s', currentID)
+            queryResult = cursor.fetchall()
+            cursor.close()
+            
+            seqNames = ['(all)']
+            
+            try:
+                queryResult = queryResult[0][0].rsplit(', ')
+                for qr in queryResult:
+                    seqNames.append( qr.rsplit(':')[0])
+                
+                # map the list to a QStringList
+                qlist = QtCore.QStringList(map(QtCore.QString, seqNames))
+                qlistStr = list(qlist)
+                
+                for seqName in qlistStr:
+                    if seqName and seqName != '(all)':
+                        seqStr = str(seqName)
+                        if seqStr == curSeq:
+                            seqIndex = int(qlistStr.index(seqName))
+                            #print 'matched sequence index: %d' % seqIndex
+                    
+                self.ui.seqMenu.addItems(qlist) 
+            
+            except AttributeError:
+                out = Output(('show: "%s" has no sequences' % currentShow), sev = 'sys')
+            
+            if seqIndex:
+                self.ui.seqMenu.setCurrentIndex(seqIndex)
+            else:
+                self.ui.seqMenu.setCurrentIndex(0)
+                
+            self.updateProject()
+            userPrefFile.updatePrefsFile()
         
     def loadFile(self):
         currentName = self.ui.fileDetailTree.currentItem().text(0)
         currentPath = self.ui.fileDetailTree.currentItem().toolTip(0)
         currentFile = currentPath + '/' + currentName
-        print 'loading file: %s' %   currentFile
+        out = Output( 'loading file: %s' %   currentFile, sev = 'sys', write=True)
         nuke.scriptOpen(str(currentFile))
-    
+        
+            
+        filename = nuke.root().name()
+        os.environ['NUKE_LAST_FILE'] = filename
+        userPrefFile.updatePrefsFile()
+        
+        # update the console tab   
+        self.updateConsoleOutput()
+        
+    def importFile(self):
+        currentName = str(self.ui.fileDetailTree.currentItem().text(0))
+        currentPath = str(self.ui.fileDetailTree.currentItem().toolTip(0))
+        currentFile = currentPath + '/' + currentName
+        out = Output( 'importing file: %s' %   currentFile, sev = 'sys', write=True)
+        nuke.nodePaste(currentFile)
+        
+        # update the console tab   
+        self.updateConsoleOutput()
+        # group the elements
+        #nuke.makeGroup()
+        
     def loadElement(self, update=False):
         currentShow = self.ui.showsMenu.currentText()
         currentShot = self.ui.shotsMenu.currentText()
@@ -133,7 +236,7 @@ class MainWindow(object):
             return
         
         sequence = str(currentPath) + '/' + str(currentElem) #TODO: sanity check this
-        out = Output(('loading element: %s' %   sequence), sev = 'sys')
+        out = Output(('loading element: %s' %   sequence), sev = 'sys', write=True)
         
         format = str(self.ui.elementDetailTree.currentItem().toolTip(4))
         range = str(self.ui.elementDetailTree.currentItem().text(5))
@@ -155,9 +258,59 @@ class MainWindow(object):
             if not readNode:
                 out = Outprint('please select a read node', sev = 'warn')
                 return
+            
+        # update the console tab   
+        self.updateConsoleOutput()
         
-    
+    def updateElement(self):
+        ''' updates a render element in the current script'''
+        readNode = nuke.selectedNode()
+        print 'updating "%s"...' % readNode.fullName()
+        if not readNode:
+            out = Output(('please select a read node'), sev='err')
+            return
+        
+        currentShow = self.ui.showsMenu.currentText()
+        currentShot = self.ui.shotsMenu.currentText()
+        currentElem = ''
+        currentPath = ''
+        try:
+            currentElem = self.ui.elementDetailTree.currentItem().text(0)
+            currentPath = self.ui.elementDetailTree.currentItem().toolTip(0)
+        except AttributeError:
+            out = Output('nothing is selected', sev = 'warn')
+            return
+        
+        sequence = str(currentPath) + '/' + str(currentElem) #TODO: sanity check this
+        out = ('updating element: %s' %   sequence)
+        
+        db = sql.connect(host='localhost', user='root', db="assets")
+        # query the database
+        cursor = db.cursor()
+        cursor.execute('select frame_start, frame_end from files where show_name = %s and asset_category = "element" and filename = %s', (currentShow,  currentElem))
+        framerangeResult = cursor.fetchall()
+        cursor.execute('select show_format from shows where show_name = %s', currentShow)
+        formatResult = cursor.fetchall()
+        cursor.close()
+        frame_start = int(framerangeResult[0][0])
+        frame_end = int(framerangeResult[0][1])
+        format =  formatResult[0][0]
+        print format
+        nuke.addFormat(format)
+        
+        readNode['file'].setValue(sequence)
+        
+        readNode['first'].setValue(frame_start)
+        readNode['last'].setValue(frame_end)
+        readNode['origfirst'].setValue(frame_start)
+        readNode['origlast'].setValue(frame_end)
+        readNode['format'].setValue(format)
+        
+        # update the console tab   
+        self.updateConsoleOutput()
+        
     def formatDate(self, datetime):
+        ''' gives us a more readable date'''
         # date comes from the db in this format: 2011-08-09 11:08:00
         datetime = datetime.rsplit()
         date = datetime[0]
@@ -189,6 +342,8 @@ class MainWindow(object):
         return result
     
     def buildElementsList(self):
+        ''' builds the Element List QTreeWidget UI'''
+        
         self.ui.elementDetailTree.clear()
         
         # TODO: sizing is kind of a hack, fix this later 
@@ -203,26 +358,33 @@ class MainWindow(object):
         #print 'building elements list...'
         currentShow = str(self.ui.showsMenu.currentText())
         currentShot = str(self.ui.shotsMenu.currentText())
-        os.environ['SHOT'] =  str(currentShot)   
-        currentID = self.ui.showsMenu.itemData(self.ui.showsMenu.currentIndex() ) 
-        currentID = int(currentID.toPyObject())     
         
-        # query the database
+        currentID = self.ui.showsMenu.itemData(self.ui.showsMenu.currentIndex() ) 
+        currentID = int(currentID.toPyObject())
+        
+        currentShotID = self.ui.shotsMenu.itemData(self.ui.shotsMenu.currentIndex() )
+        
+        try: 
+            currentShotID = int(currentShotID.toPyObject())
+            os.environ['SHOT_ID'] = str(currentShotID) 
+        except TypeError:
+            pass        
+          
+        os.environ['SHOT'] =  str(currentShot)        
+        userPrefFile.updatePrefsFile()
+        
+        # query the database for all elements related to the shot
         db = sql.connect(host='localhost', user='root', db="assets")
         cursor = db.cursor()
-        cursor.execute('select fileID, filepath, filename, submitdate, createdBy, frame_start, frame_end, format, version, asset_class from files where showID = %s and asset_category = "element" and asset_name = %s', (currentID, currentShot))
+        cursor.execute('select fileID, filepath, filename, submitdate, createdBy, frame_start, frame_end, format, version, asset_class, shotID from files where showID = %s and asset_category = "element" and asset_base_name = %s', (currentID, currentShot))
         queryResult = cursor.fetchall()
-        cursor.close()
+     
+      
         for row in queryResult:
            
             parent = QtGui.QTreeWidgetItem(self.ui.elementDetailTree)
             parent.setSizeHint(0, QtCore.QSize(300, 16)) # works for height, but not width
-            
-            #firstchild = QtGui.QTreeWidgetItem(parent, 'child1')
-            #secondchild = QtGui.QTreeWidgetItem(parent, 'child2')
-            #parent.addChild(firstchild)
-            #parent.addChild(secondchild)
-            
+                      
             date = str(row[3])
             date = self.formatDate(date)
             range = (str(row[5]) + ' - ' + str(row[6]))
@@ -230,6 +392,22 @@ class MainWindow(object):
             # TODO: use studio prefs here
             version = '%03d' % row[8]
             assetclass = str(row[9])
+            showID = int(row[10])
+            
+            # get the sequence 
+            # TODO: get this with a join
+            cursor.execute('select shot_name, shot_sequence, shot_comp_root, shot_roto_root, shot_plate_root, shot_desc from shots where shotID = %s', showID)
+            assetInfo = cursor.fetchall()
+                        
+            assetName = ''
+            assetType = ''
+            shot_sequence = ''
+            compRoot = ''
+            rotoRoot = ''
+            plateRoot = ''
+            asset_desc = ''
+      
+            shot_sequence = assetInfo[0][1]
             
             format = row[7]
             format = format.rsplit()
@@ -242,22 +420,25 @@ class MainWindow(object):
             parent.setText(4, format)
             parent.setText(5, range)
             parent.setText(6, assetclass)
-            
-            if os.environ['SEQ'] == '(all)':
-                whereStr =  ('category=shot assetName=%s show_name=%s' % (currentShot ,currentShow)).rsplit()
-                query = Query(select = 'shot sequence', table = 'assets', where = whereStr)
-                #print query.result
+            try:
+                if os.environ['SEQ'] == '(all)':
+                    whereStr =  ('category=shot assetName=%s show_name=%s' % (currentShot ,currentShow)).rsplit()
+                    query = Query(select = 'shot sequence', table = 'assets', where = whereStr)
+                    print query.result
+            except KeyError:
+                pass
             
             # assign the file path to a tooltip
             parent.setToolTip(0, row[1])
             parent.setToolTip(4, row[7])
-            parent.setToolTip(6, row[1]) # pass the sequence
+            parent.setToolTip(6, shot_sequence) # pass the sequence
 
 
-            
+        cursor.close()   
         self.updateProject()
        
     def buildShotsList(self):
+        ''' builds the shots UI menu'''
         # clear the UI
         self.ui.shotsMenu.clear()
         self.ui.elementDetailTree.clear()
@@ -267,28 +448,56 @@ class MainWindow(object):
         currentSeq = self.ui.seqMenu.currentText()
         currentSeq = str(currentSeq)
         
-        os.environ['SEQ'] = str(currentSeq)
-        db = sql.connect(host='localhost', user='root', db="assets")
+        # get the current showID from the userData
+        currentID = self.ui.showsMenu.itemData(self.ui.showsMenu.currentIndex() ) 
+        currentID = int(currentID.toPyObject())
+        
+        if currentSeq != '(all)':
+            os.environ['SEQ'] = str(currentSeq)
+            userPrefFile.updatePrefsFile()
+        
+        curShot = ''
+        
+        try:
+          curShot = os.environ['SHOT']
+        except KeyError:
+          pass
+        
         # query the database
+        db = sql.connect(host='localhost', user='root', db="assets")
         cursor = db.cursor()
         if currentSeq:
+            
+            # if 'All' is selected in the Sequence menu, return all shots in the show
             if currentSeq == '(all)':
-                cursor.execute('select assetName from assets where show_name = %s and category = "shot"', currentShow)
+                cursor.execute('select shot_name, shotID from shots where showID = %s', currentID)
                 queryResult = cursor.fetchall()
             else:
-                cursor.execute('select assetName from assets where show_name = %s and shot_sequence = %s and category = "shot"', (currentShow, currentSeq))
+                #cursor.execute('select asset_base_name from assets where show_name = %s and shot_sequence = %s and category = "shot"', (currentShow, currentSeq))
+                cursor.execute('select shot_name, shotID from shots where showID = %s and shot_sequence = %s', (currentID, currentSeq))
                 queryResult = cursor.fetchall()
             
             cursor.close()
             shots = []
+            shotIDs = []
             if queryResult:
                 for row in queryResult:
                     shots.append(row[0])
+                    shotIDs.append(row[1])
         
-                # new code
-                item = self.ui.shotsMenu
-                qlist = QtCore.QStringList(map(QtCore.QString, shots))
-                self.ui.shotsMenu.addItems(qlist)    
+            shotInfo = zip(shots, shotIDs)
+            
+            
+            curIndex = 0
+             
+            for info in shotInfo:
+                # showID is show[1]
+                self.ui.shotsMenu.addItem(info[0], info[1]) # add the current showID to the QComboBox userData
+                if curShot == str(info[0]):
+                    #print 'setting show index: %s' % curShow
+                    curIndex = shotInfo.index(info)
+                
+             
         self.updateProject()
         
     def buildFilesList(self):
@@ -309,7 +518,7 @@ class MainWindow(object):
         # query the database
         db = sql.connect(host='localhost', user='root', db="assets")
         cursor = db.cursor()
-        cursor.execute('select filepath, filename, submitdate, createdBy, frame_start, frame_end, format, version, file_comments from files where show_name = %s and asset_type = "nuke_script" and asset_name = %s', (currentShow, currentShot))
+        cursor.execute('select filepath, filename, submitdate, createdBy, frame_start, frame_end, format, version, file_comments from files where show_name = %s and asset_type = "nuke_script" and asset_base_name = %s', (currentShow, currentShot))
         queryResult = cursor.fetchall()
         cursor.close()
         for row in queryResult:
@@ -320,7 +529,7 @@ class MainWindow(object):
             parent.setSizeHint(0, QtCore.QSize(300, 16)) # works for height, but not width
 
             date = str(row[2])
-            date = self.formatDate(date)
+            date = self.formatDate(date)    
             range = (str(row[4]) + ' - ' + str(row[5]))
             
             # TODO: use studio prefs here
@@ -347,6 +556,9 @@ class MainWindow(object):
         self.buildElementsList()
         self.buildFilesList()
         self.updateProject()
+        self.updateAdminTab()
+        self.updateHelpTab()
+        self.updateConsoleOutput()
     
     
     def formatElementInfo(self):
@@ -355,12 +567,15 @@ class MainWindow(object):
         try:
             currentElement = str(self.ui.elementDetailTree.currentItem().text(0))
             currentVersion = str(self.ui.elementDetailTree.currentItem().text(1))
+            currentSequence = str(self.ui.elementDetailTree.currentItem().toolTip(6))
+            print 'currentSequence: %s' % currentSequence
+            os.environ['SEQ'] = currentSequence
             os.environ['VER'] =  str(int(currentVersion))
             self.ui.elementInfo.clear()
             db = sql.connect(host='localhost', user='root', db="assets")
             # query the database
             cursor = db.cursor()
-            cursor.execute('select filepath, filename, createdBy, submitfile, submitdate, frame_start, frame_end, file_desc, file_comments from files where show_name = %s and asset_name = %s and filename = %s and asset_category = "element"', (currentShow, currentShot, currentElement))
+            cursor.execute('select filepath, filename, createdBy, submitfile, submitdate, frame_start, frame_end, file_desc, file_comments from files where show_name = %s and asset_base_name = %s and filename = %s and asset_category = "element"', (currentShow, currentShot, currentElement))
             queryResult = cursor.fetchall()
             cursor.close()
             data = queryResult[0]
@@ -377,6 +592,8 @@ class MainWindow(object):
         except AttributeError:
             pass
         
+        userPrefFile.updatePrefsFile()
+        
     def formatFileInfo(self):
         currentShow = self.ui.showsMenu.currentText()
         currentShot = self.ui.shotsMenu.currentText()
@@ -387,7 +604,7 @@ class MainWindow(object):
             # query the database
             db = sql.connect(host='localhost', user='root', db="assets")
             cursor = db.cursor()
-            cursor.execute('select filepath, filename, createdBy, version,  submitdate, frame_start, frame_end, file_desc, file_comments from files where show_name = %s and asset_name = %s and filename = %s and asset_category = "comp"', (currentShow, currentShot, currentFile))
+            cursor.execute('select filepath, filename, createdBy, version,  submitdate, frame_start, frame_end, file_desc, file_comments from files where show_name = %s and asset_base_name = %s and filename = %s and asset_category = "comp"', (currentShow, currentShot, currentFile))
             queryResult = cursor.fetchall()
             cursor.close()
             data = queryResult[0]
@@ -403,41 +620,45 @@ class MainWindow(object):
             self.ui.fileInfo.setText(S)
         except AttributeError:
             pass
-        
-    def returnLoadedModules(self):
-        ''' returns a string list of all assetmanager modules currently installed'''
-        result = []
-        for k, v in sys.modules.items():
-            try:
-                if (v.__amlib__):
-                    v = str(v)
-                    if 'asset' in v:
-                        val = v.rsplit('\'')
-                        ver = ''
-                        try:
-                            ver = eval(val[1]+'.__version__')
-                
-                        except (AttributeError, NameError):
-                            pass
-                        if ver:
-                            ver = (' (v'+ver+')')
-                        val[3] = val[3].replace('\\', '/')
-                        #for e in list((val[1], val[3], ('-'*60))):
-                        result.append(''.join(list(((val[1]+ver+'\n'), (val[3]+'\n'), ('-'*61+'\n')))))
-                resultStr = ''.join(sorted(result))
-                return resultStr
-            except AttributeError:
-                pass
             
+    def updateAdminTab(self):
+        amLoc = os.environ['ASSET_MANAGER_LOC']
+        result = []
+        for mod in __builtin__.am_mods:
+            mod = mod.replace('\\', '/')
+            result.append(mod)
+            
+        lines = ''.join(result)
+        self.ui.moduleText.setPlainText(lines)
+        
+                 
     def updateProject(self):
-        curShow = os.environ['SHOW']
-        curSeq = os.environ['SEQ']
-        curShot = os.environ['SHOT']
+        """updates the project tab (variables)"""
+        curShow = ''
+        curSeq = ''
+        curShot = ''
+        assetManagerLoc = ''
+        pipelineLibLoc = ''
+        pipelineNukeLibLoc = ''
+        pipelineMayaLibLoc = ''
+        
+        try:
+            curShow = os.environ['SHOW']
+            curSeq = os.environ['SEQ']
+            curShot = os.environ['SHOT']
+            assetManagerLoc = os.environ['ASSET_MANAGER_LOC']
+            pipelineLibLoc = os.environ['PIPELINE_LIB']
+            pipelineNukeLibLoc = os.environ['PIPELINE_NUKE_LIB']
+            pipelineMayaLibLoc = os.environ['PIPELINE_MAYA_LIB']
+            
+        except KeyError:
+            pass
         
         db = sql.connect(host='localhost', user='root', db="assets")
         
         # query the database
         show = shows.ShowObj(curShow, shot=curShot)
+        
         if show.showRoot:
             self.ui.showRootText.setText(show.showRoot)
             os.environ['SHOW_ROOT'] = show.showRoot 
@@ -472,8 +693,8 @@ class MainWindow(object):
         role = UserObj().user_role
         user_os = sys.platform
         home = os.environ['HOME'] 
-        usrLog = os.environ['AM2_USER_LOGS'] 
-        sysLog = os.environ['AM2_SYSTEM_LOGS'] 
+        usrLog = os.environ['AM_USER_LOGS'] 
+        sysLog = os.environ['AM_SYSTEM_LOGS'] 
         
         self.ui.curShowText.setText(curShow)
         if curSeq != '(all)':
@@ -485,48 +706,19 @@ class MainWindow(object):
         self.ui.homeText.setText(home) 
         self.ui.usrLogText.setText(usrLog)
         self.ui.sysLogText.setText(sysLog)
+        self.ui.assetManagerLocTextfield.setText(assetManagerLoc)
+        self.ui.pipelineLibTextfield.setText(pipelineLibLoc)
+        self.ui.pipelineNukeLibTextfield.setText(pipelineNukeLibLoc)
+        self.ui.pipelineMayaLibTextfield.setText(pipelineMayaLibLoc)    
+        
         
         self.updateConsoleOutput()
-        
-    def updateElement(self):
-        readNode = nuke.selectedNode()
-        print 'updating "%s"...' % readNode.fullName()
-        if not readNode:
-            out = Output(('please select a read node'), sev='err')
-            return
-        
-        currentShow = str(self.ui.showsMenu.currentText())
-        currentElem = str(self.ui.elementList.currentItem().text())
-        currentPath = str(self.ui.elementList.currentItem().toolTip())
-        sequence = currentPath + '/' + currentElem
-        print 'updating element: %s' %   sequence
-        
-        db = sql.connect(host='localhost', user='root', db="assets")
-        # query the database
-        cursor = db.cursor()
-        cursor.execute('select frame_start, frame_end from files where show_name = %s and asset_category = "element" and filename = %s', (currentShow,  currentElem))
-        framerangeResult = cursor.fetchall()
-        cursor.execute('select show_format from shows where show_name = %s', currentShow)
-        formatResult = cursor.fetchall()
-        cursor.close()
-        frame_start = int(framerangeResult[0][0])
-        frame_end = int(framerangeResult[0][1])
-        format =  formatResult[0][0]
-        print format
-        nuke.addFormat(format)
-        
-        readNode['file'].setValue(sequence)
-
-        readNode['first'].setValue(frame_start)
-        readNode['last'].setValue(frame_end)
-        readNode['origfirst'].setValue(frame_start)
-        readNode['origlast'].setValue(frame_end)
-        readNode['format'].setValue(format)
+        userPrefFile.updatePrefsFile()
         
     def updateConsoleOutput(self):
         ''' updates the console tab output area'''
-        usr_logs = os.environ['AM2_USER_LOGS']
-        usr_output_log = pp.join(usr_logs, 'am_output.txt')
+        usr_logs = os.environ['AM_USER_LOGS']
+        usr_output_log = pp.join(usr_logs, 'am_usr_log.txt')
         
         try:
             file = open(usr_output_log , 'r')
@@ -534,26 +726,37 @@ class MainWindow(object):
             self.ui.moduleList.setPlainText(lines)
             
         except IOError:
-            out = Output(('user output log deleted, please contact the adminstrator'),  sev='err')
-        
-
-
+            out = Output(('user output log deleted, please contact the administrator'),  sev='err')
+            
+    def updateHelpTab(self):
+        helpText = help(__name__)
+        self.ui.helpText.setPlainText(helpText)
+          
         
 def initMain():
-  dialog = MainWindow()
-  dialog.showUI()
-  dialog.buildShowsMenu()
-  dialog.updateUI()
-  dialog.updateProject()
+  window = MainWindow()
+  window.showUI()
+  
+  # build the initial shows menu
+  window.buildShowsMenu()
+  window.updateAdminTab()
+  #dialog.updateUI()
+  window.updateProject()
+  window.updateConsoleOutput()
+  window.updateHelpTab
   
   
   
 
 if __name__ == "__main__":
+    print 'importing __builtin__ module'
+    import __builtin__
+    __builtin__.am_mods = []
+    os.environ['AM_USER_LOGS'] = ''
     # if launched from a command line (outside of nuke or maya)
     app = QtGui.QApplication(sys.argv)
-    os.environ['AM2_USER_LOGS'] = (os.environ['HOME']+'/'+'.am')
-    os.environ['AM2_SYSTEM_LOGS'] = 'C:/Users/michael/workspace/assetmanager/logs'
+    os.environ['AM_USER_LOGS'] = (os.environ['HOME']+'/'+'.am')
+    os.environ['AM_SYSTEM_LOGS'] = 'C:/Users/michael/workspace/assetmanager/logs'
     main_window = MainWindow()
     main_window.showUI()
     # Enter the main loop

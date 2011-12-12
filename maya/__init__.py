@@ -1,26 +1,26 @@
-# vfx-assetmanager.maya by Michael Fessenden (c) 2011
+# assetmanager.maya by Michael Fessenden (c) 2011
 #
-# v0.29
+# v0.31
 #
 # Description :
 # -------------
-# This is the loader for the vfx-assetmanager Maya utilities
+# This is the loader for the assetmanager Maya utilities
 #
 #
 # Version History :
 # -----------------
-# v0.29:
+# v0.31:
 # - development version
 
 
 import posixpath as pp
 import os
 import maya.cmds as mc
-from vfx-assetmanager.lib.output import Output
-from vfx-assetmanager.maya.system import buildSystemModulesTab
+from assetmanager.lib.system import Output
+from assetmanager.maya.system import buildSystemModulesTab
 
-__version__ = '0.29'
-__lastupdate__ = 'Aug 22 2011'
+__version__ = '0.31'
+__lastupdate__ = 'Dec 07 2011'
 __repr__ = 'vfx-assetmanager.maya'
 __modulecontents__ = ['assets', 'attrs', '*autoLoad', 'browser', 'optVars', 'system', 'optVars', 'proj', 'system']
 namespace = __name__
@@ -64,7 +64,7 @@ for menu in am_mainMenuList:
     
 def assetManagerLoad():
     ''' searches for a config file, reads it and returns a dictionary of absolute show roots & render roots'''
-    am_path = os.environ['ASSET_MANAGER_PY_LOC']
+    am_path = os.environ['ASSET_MANAGER_LOC']
     cfg = am_path + '/studio_prefs.ini'
     showsRoot = []
     renderRoot = []

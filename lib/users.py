@@ -1,6 +1,6 @@
 # users.py by Michael Fessenden (c) 2011
 #
-# v0.28
+# v0.33
 #
 # Description :
 # -------------
@@ -9,7 +9,7 @@
 #
 # Version History :
 # -----------------
-# v0.28:
+# v0.33:
 # - development version
 #
 # TODO List :
@@ -18,53 +18,68 @@
 # ----------------------------------------------------------------------------
 
 
-import MySQLdb as sql
 import re
-from assetmanager.lib.am_os import returnUsername
-from assetmanager.lib.output import Output 
-
-db = sql.connect(host='localhost', user='root', db="assets")
-cursor = db.cursor()
-
-cursor.execute('show columns from users')
-colNames = cursor.fetchall()
-columnNames = [col[0] for col in colNames]
+from assetmanager.lib.system import Output, returnUsername
+from assetmanager.lib.sql import Query
 
 
-__version__ = '0.28'
-__lastupdate__ = 'Jul 25 2011'
+__version__ = '0.33'
+__lastupdate__ = 'Dec 09 2011'
 __repr__ = 'users'
 __amlib__ = 'users'
-#mc.optionVar(sva=('am2_lib_libraries', __name__))
+__status__ = 'design'
 
-out = Output('initializing assetManager common users library')
+import __builtin__
+try:
+    __builtin__.am_mods.append(__name__ + ' - (' + __status__ + '  v' + __version__ + ') - '+ __lastupdate__ +'\n' + __file__ + '\n\n' )
+except:
+    pass
+
 
 class UserObj(object):
-    '''creates an object for a given user, if his data exists in the users table'''
-    def __init__(self, username=''):
-        self.username = username
+    """
+    Class: UserObj()
+      
+    DESCRIPTION
+        Base user class. It stores information about the current user.
+            
+    USAGE
+        Simply the class; if no username is specified, it is assumed that you 
+        are querying the current user
+        
 
+    """
+    def __init__(self, username=''):
+        self.userID = 0
         # raise an error if a username wasn't provided
-        if not self.username:
-            #raise RuntimeError('please enter a username')
+        if not username:
             self.username = returnUsername()
+        else:
+            self.username = username
         
         # query the database and get the assetID
-        cursor.execute('select * from users where username = %s', self.username)
-        queryData = cursor.fetchall()
-        cursor.close
+        if self.username:
+            query = ('select * from users where username = "%s"' % self.username)
+            queryObj = Query(query)
+            queryData = queryObj.result
+            columnNames = tuple(queryObj.desc)
+        else:
+            outmsg = Output('cannot find a username', sev = 'err')
+
         try:
-            self.userID = int([data[0] for data in queryData][0])
-        except IndexError:
-            print '>> error: user not in database'
+
+         self.userID = str(queryData[0])
+         
+        except:
+            outmsg = Output('error: user "%s" does not have an ID' % self.username, sev = 'err')
         
         # if the user exists in the database, set attributes for him or her
         if self.userID:
-            userData = [col for col in queryData]
-            
+            userData = tuple([str(col) for col in queryData])
+           
             
             # zip the colNames/data into a list of tuples
-            userData = zip(columnNames, list(userData[0]))
+            userData = zip(columnNames, list(userData))
             for d in userData:
                 if not 'userID' in d[0]:
                     setattr(self, d[0], d[1]) 

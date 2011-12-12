@@ -1,15 +1,15 @@
 # attrs.py by Michael Fessenden (c) 2011
 #
-# v0.29
+# v0.30
 #
 # Description :
 # -------------
-# This is the module that builds the custome attrs UI and adds/sets attributes
+# This is the module that builds the custom attrs UI and adds/sets attributes
 #
 #
 # Version History :
 # -----------------
-# v0.29:
+# v0.30:
 # - development version
 #
 # TODO List :
@@ -20,10 +20,11 @@
 import maya.cmds as mc
 import re
 
-__version__ = '0.29'
-__lastupdate__ = 'Jul 27 2011'
+__version__ = '0.30'
+__lastupdate__ = 'Aug 22 2011'
 __repr__ = 'attributes'
 __amlib__ = 'attrs'
+__status__ = 'design'
 
 # MODEL ATTRS
 am_model_attrs = ('s.am_nodeType', 's.assetName', 's.assetClass', 's.assetCat', 's.show', 's.objName', 's.sg','s.refFile', 's.submitScene', 'l.version', 'l.sgVer', 'l.pcVer', 'b.modelExclude', 'b.cache')
@@ -63,6 +64,7 @@ all_am_attrsNN = am_model_attrsNN + am_rig_attrsNN + am_sg_attrsNN + am_cacheSet
 
 class assetObj(object):
     # 'self' refers to the python object, while 'name' is the maya object
+    # TODO: blow this away, it's been replace by the AssetBase class
     def __init__(self, name):
         self.name = name
         am_nt = getObjectType(self.name)

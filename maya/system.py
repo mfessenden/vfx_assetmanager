@@ -1,6 +1,6 @@
 # system.py by Michael Fessenden (c) 2011
 #
-# v0.28
+# v0.31
 #
 # Description :
 # -------------
@@ -9,13 +9,21 @@
 #
 # Version History :
 # -----------------
-#
+# v0.31:
+# -
+# 
+# v0.29:
+# -
+# 
 # v0.26:
-# - development version
+# - 
+#
 # v0.20:
 # - added the optVars tab and the query function
+#
 # v0.17:
 # - added tabLayout
+#
 # v0.16:
 # - initial release
 #
@@ -27,13 +35,13 @@
 
 
 import maya.cmds as mc
-from assetmanager.lib.am_os import returnLoadedModules
-from assetmanager.lib.output import Output
+from assetmanager.lib.system import returnLoadedModules, Output
 
-__version__ = '0.29'
-__lastupdate__ = 'Aug 15 2011'
+__version__ = '0.31'
+__lastupdate__ = 'Dec 08 2011'
 __repr__ = 'system'
 __amlib__ = 'system'
+__status__ = 'production'
 
 out = Output('building assetManager maya system tab' )
 

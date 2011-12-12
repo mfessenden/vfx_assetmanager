@@ -1,6 +1,6 @@
 # assets.py by Michael Fessenden (c) 2011
 #
-# v0.29
+# v0.32
 #
 # Description :
 # -------------
@@ -8,8 +8,15 @@
 #
 # Version History :
 # -----------------
+# v0.32:
+# - development version
+#
+# v0.31:
+# - added the AssetBase class
+#
 # v0.29:
 # - added 'returnShowAssets'
+#
 # v0.24:
 # - fleshed out the showObj class
 # - changes this module to support MySQL
@@ -24,32 +31,40 @@
 # ----------------------------------------------------------------------------
 
 
-import MySQLdb as sql
 import re
-from assetmanager.lib.output import Output 
+from assetmanager.lib.system import Output
+from assetmanager.lib.sql import Query
 
-__version__ = '0.29'
-__lastupdate__ = 'Aug 22 2011'
+__version__ = '0.32'
+__lastupdate__ = 'Dec 09 2011'
 __amlib__ = 'assets'
+__status__ = 'production'
+
+import __builtin__
+try:
+    __builtin__.am_mods.append(__name__ + ' - (' + __status__ + '  v' + __version__ + ') - '+ __lastupdate__ +'\n' + __file__ + '\n\n' )
+except:
+    pass
+
 
 out = Output('initializing assetManager common assets library')
 
-db = sql.connect(host='localhost', user='root', db="assets")
-cursor = db.cursor()
 
-def returnShowAssets(show):
-    cursor.execute('select assetName from assets where show_name = %s', show)
-    queryData = cursor.fetchall()
-    showAssetData = [col for col in queryData]
-    assetNames = []
-    for show in showAssetData:
-        assetNames.append(show[0])
-        
-    return assetNames
+#===============================================================================
+# def returnShowAssets(show):
+#    cursor.execute('select asset_name from assets where show_name = %s', show)
+#    queryData = cursor.fetchall()
+#    showAssetData = [col for col in queryData]
+#    assetNames = []
+#    for show in showAssetData:
+#        assetNames.append(show[0])
+#        
+#    return assetNames
+#===============================================================================
 
 def showAllAssets():
     ''' prints out a list of all the assets in the database'''
-    cursor.execute('select assetName, assetType, show_name, assetRoot from assets')
+    cursor.execute('select asset_name, asset_type, show_name, asset_root from assets')
     allAssets = cursor.fetchall() 
     for asset in allAssets:
         print ('assetName: %s' % asset[0])
@@ -61,8 +76,19 @@ def showAllAssets():
         print '='*50
                    
                    
-class AssetObj(object):
-    ''' builds the asset object class'''
+class AssetBase(object):
+    """
+    Class: AssetBase()
+      
+    DESCRIPTION
+        This is the base asset class. It pulls data from the database and stores important attributes 
+        about the asset.
+            
+    USAGE
+        Call the class with with the name of the asset and the show that the asset belongs to.
+        
+
+    """
     def __init__(self, name='', show=''):
         self.assetName = name
         self.show_name = show
@@ -72,7 +98,7 @@ class AssetObj(object):
             raise RuntimeError('not enough information given, please input an assetName and the show_name')
         
         # query the database and get the assetID
-        cursor.execute('select assetID from assets where assetName = %s and show_name = %s', (self.assetName, self.show_name))
+        cursor.execute('select assetID from assets where asset_name = %s and show_name = %s', (self.assetName, self.show_name))
         queryData = cursor.fetchall()
 
         # if there is an assetID value, then this asset must exist in the database
@@ -116,7 +142,7 @@ class AssetObj(object):
             
 
     def query(self, refresh = 1, allattrs = 0):
-        ''' just runs a simple query on the object and prints out results'''
+        ''' runs a simple query on the object and prints out results'''
         
         if self.assetName is not None:
             if refresh:
@@ -167,7 +193,7 @@ class AssetObj(object):
         The new asset is considered "dirty" until the required directories are created and resolved'''
         
         # get all of the shows
-        cursor.execute('select showName from shows')
+        cursor.execute('select show_name from shows')
         showsQuery = cursor.fetchall()
         allShows = [sh[0] for sh in showsQuery]
         
@@ -224,7 +250,7 @@ class AssetObj(object):
             self.show_name = show_name
         
         print '>> deleting asset: "%s" from show "%s"'  % (self.assetName, self.show_name) 
-        cursor.execute('delete from assets where assetName = "%s" and show_name = "%s"'  % (self.assetName, self.show_name))
+        cursor.execute('delete from assets where asset_name = "%s" and show_name = "%s"'  % (self.assetName, self.show_name))
         db.commit()
         self.assetName = 'deleted'
         self.show_name = 'deleted'
@@ -236,9 +262,9 @@ class AssetObj(object):
         try:
             cursor.execute('select * from assets where assetID = %s ' % self.assetID)
         except AttributeError:
-            cursor.execute('select assetID from assets where assetName = %s and show_name = %s', (self.assetName, self.show_name))
+            cursor.execute('select assetID from assets where asset_name = %s and show_name = %s', (self.assetName, self.show_name))
         finally:
-            cursor.execute('select assetID from assets where assetName = %s and show_name = %s', (self.assetName, self.show_name))
+            cursor.execute('select assetID from assets where asset_name = %s and show_name = %s', (self.assetName, self.show_name))
             
         queryData = cursor.fetchall()
         

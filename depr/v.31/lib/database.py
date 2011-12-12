@@ -52,6 +52,7 @@ showDefaults = ['','','','','@SHOWROOT@/assets','@SHOWROOT@/shots','','@SHOWROOT
 
 import MySQLdb as sql
 import re
+from assetmanager.lib.output import Output
 
 db = sql.connect(host='localhost', user='root', db="assets")
 cursor = db.cursor()
@@ -70,7 +71,7 @@ class Asset(object):
         # what kind of asset are we talking about? Shot, 3D asset, plate, etc...
         self.name = name
         s = (name,)
-        results = cursor.execute('select * from assetGlobals WHERE assetName=?' , s)
+        results = cursor.execute('select * from assets where asset_base_name =?' , s)
         data = [row[0] for row in results.fetchall()]
         for d in data:
             try:
@@ -88,8 +89,8 @@ class Show(object):
 def returnAllColumns(table):
     ''' this returns a list of the columNames from the given table'''
     msg = """SHOW columns FROM %s""" % table
-    dprint(msg)
-    cursor.execute("""SHOW columns FROM %s""" % table)
+    out = Output(msg)
+    cursor.execute('show columns from %s',  table)
     colNames = cursor.fetchall()
     desc = [col[0] for col in colNames]
     return desc
@@ -139,7 +140,7 @@ def insertRow(table, columns, values):
 # TODO: should this be returned as a tuple?
 def returnAllShows():
     ''' returns a list of shows from the database'''
-    cursor.execute("""SELECT show_name FROM showGlobals""")
+    cursor.execute('select show_name from shows')
     results = [] 
     showData = cursor.fetchall()
     for data in showData:
@@ -149,7 +150,7 @@ def returnAllShows():
 
 def returnAllAssets():
     ''' returns a list of all asset names in the database'''
-    cursor.execute("""SELECT * from assetGlobals""")
+    cursor.execute("""SELECT * from assets""")
     results = cursor.fetchall()
     result = []
     for row in results:
@@ -160,7 +161,7 @@ def returnAllShowAssets(show):
     ''' returns a list of assets from the database given a show argument'''
     # convert the show name to a tuple
     s = (show,)
-    results = cursor.execute('select assetName from assetGlobals WHERE show=?' , s)
+    results = cursor.execute('select asset_base_name from assets WHERE show=?' , s)
     data = [row[0] for row in results.fetchall()]
     result = []
     for d in data:
@@ -173,9 +174,9 @@ def queryAsset(asset):
     ''' queries the database for the given asset name(s), returns a list with a dictionary for each entry found'''
     desc = returnAllColumns('assets')
     asset = formatSQL(asset, column=False)
-    msg = ("""select * from assets where assetName like %s or show_name like %s""" % (asset, asset))
+    msg = ("""select * from assets where asset_base_name like %s or show_name like %s""" % (asset, asset))
     dprint(msg)
-    cursor.execute("""select * from assets where assetName like %s or show_name like %s""" % (asset, asset))
+    cursor.execute("""select * from assets where asset_base_name like %s or show_name like %s""" % (asset, asset))
     
     
    

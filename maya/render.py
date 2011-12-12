@@ -1,4 +1,8 @@
-
+__version__ = '0.32'
+__lastupdate__ = 'Dec 09 2011'
+__repr__ = 'render'
+__amlib__ = 'render'
+__status__ = 'design'
 
 
 import maya.cmds as mc

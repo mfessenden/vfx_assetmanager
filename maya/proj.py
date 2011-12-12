@@ -1,6 +1,6 @@
 # proj.py by Michael Fessenden (c) 2011
 #
-# v0.28
+# v0.30
 #
 # Description :
 # -------------
@@ -9,6 +9,9 @@
 #
 # Version History :
 # -----------------
+# v0.32:
+# - development version
+#
 # v0.28:
 # - reworked the output functions
 # - fixed a bug that formatted AM/PM in the date incorrectly
@@ -25,10 +28,11 @@ import maya.cmds as mc
 from assetmanager.lib.am_os import returnUsername, eprint, outprint, sprint, dprint
 from assetmanager.lib.users import UserObj
 
-__version__ = '0.28'
-__lastupdate__ = 'Jul 25 2011'
+__version__ = '0.32'
+__lastupdate__ = 'Dec 09 2011'
 __repr__ = 'proj'
 __amlib__ = 'proj'
+__status__ = 'production'
 
 # pull data from the database for the current user
 username = returnUsername()

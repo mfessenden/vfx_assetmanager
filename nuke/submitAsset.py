@@ -1,6 +1,6 @@
 # submitAsset.py by Michael Fessenden (c) 2011
 #
-# v0.29
+# v0.30
 #
 # Description :
 # -------------
@@ -9,7 +9,7 @@
 #
 # Version History :
 # -----------------
-# v0.29:
+# v0.30:
 # - development version
 #
 # TODO List :
@@ -18,9 +18,10 @@
 # ----------------------------------------------------------------------------
 
 
-__version__ = '0.29'
+__version__ = '0.30'
 __lastupdate__ = 'Aug 22 2011'
 __amlib__ = 'submitAsset'
+__status__ = 'development'
 
 
 # assetManager functions
