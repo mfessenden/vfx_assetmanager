@@ -1,0 +1,4 @@
+# assetManager system log file
+# created Thu Dec 08 08:25 PM
+# storage for system-wide output and error messages
+

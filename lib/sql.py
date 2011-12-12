@@ -1,6 +1,6 @@
 # sql.py by Michael Fessenden (c) 2011
 #
-# v0.32
+# v0.33
 #
 # Description :
 # -------------
@@ -97,7 +97,10 @@ class Query(object):
                     
                 # unless there's an error in the SQL query...format it and pass it to the user
                 except Exception, err:
-                      outmsg =  Output('Error: %d: %s' % (err.args[0],err.args[1]), sev = 'sqlerr')
+                    try:
+                        outmsg =  Output('Error: %d: %s' % (err.args[0],err.args[1]), sev = 'sqlerr')
+                    except:
+                        outmsg =  Output('---', sev = 'sqlerr')
             else:
                 outmsg = Output(msg = 'please enter a query')
     

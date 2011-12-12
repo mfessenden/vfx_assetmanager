@@ -1,0 +1,22 @@
+v.33:
+	development version
+
+v.31:
+	added new Output class, new AssetBase class, projectSettings.xml, studioSettings.xml, sql Query class
+
+v.30:
+	- added PyQt for Maya
+	- base classes added:
+		Query
+		
+	- added help files
+	
+	New Files:
+		lib/
+		
+	Deprecated:
+		/maya/autoLoad.py
+		
+v.29:
+	
+	

@@ -9,7 +9,7 @@
 #
 # Version History :
 # -----------------
-# v0.32:
+# v0.33:
 # - added Catch
 #
 # v0.31:
@@ -31,7 +31,7 @@ import inspect
 from xml.etree import ElementTree as ET
 from xml.dom import minidom
 
-__version__ = '0.32'
+__version__ = '0.33'
 __lastupdate__ = 'Dec 07 2011'
 __repr__ = 'assetmanager.lib.system'
 __amlib__ = 'system'

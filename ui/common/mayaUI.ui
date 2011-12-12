@@ -365,6 +365,9 @@ p, li { white-space: pre-wrap; }
                   </item>
                   <item>
                    <widget class="QPushButton" name="assets_btn_imp">
+                    <property name="enabled">
+                     <bool>false</bool>
+                    </property>
                     <property name="sizePolicy">
                      <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                       <horstretch>0</horstretch>
@@ -380,10 +383,16 @@ p, li { white-space: pre-wrap; }
                     <property name="text">
                      <string>Import</string>
                     </property>
+                    <property name="checkable">
+                     <bool>true</bool>
+                    </property>
                    </widget>
                   </item>
                   <item>
                    <widget class="QPushButton" name="assets_btn_ref">
+                    <property name="enabled">
+                     <bool>false</bool>
+                    </property>
                     <property name="sizePolicy">
                      <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                       <horstretch>0</horstretch>
@@ -1840,7 +1849,7 @@ p, li { white-space: pre-wrap; }
      <x>0</x>
      <y>0</y>
      <width>740</width>
-     <height>19</height>
+     <height>18</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuOptions">
@@ -1881,5 +1890,22 @@ p, li { white-space: pre-wrap; }
   </action>
  </widget>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>assets_btn_ref</sender>
+   <signal>pressed()</signal>
+   <receiver>assetsInfo</receiver>
+   <slot>clear()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>653</x>
+     <y>722</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>369</x>
+     <y>568</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
 </ui>

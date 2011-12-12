@@ -44,6 +44,8 @@ from assetmanager.lib.system import Output, UserPrefs, returnLoadedModules
 from assetmanager.lib.shows import ShowObj
 from assetmanager.lib.sql import Query
 
+from assetmanager.maya.fileIO import referenceFile
+
 __version__ = '0.33'
 __lastupdate__ = 'Dec 11 2011'
 __repr__ = 'assetManagerUI'
@@ -112,6 +114,8 @@ class AssetManagerUI(base_class, form_class):
         self.connect(self.showsMenu, QtCore.SIGNAL('currentIndexChanged(int)'), self.buildCategoriesMenu) # adding QString seems to crash this
         self.connect(self.categoriesMenu, QtCore.SIGNAL('currentIndexChanged(int)'), self.buildAssetList)
         
+        
+        
 
         global currentAssetClasses
         
@@ -169,8 +173,15 @@ class AssetManagerUI(base_class, form_class):
         currentID = int(currentID.toPyObject())
         self.currentShowID = str(currentID) # TODO: declare this earlier?
         
+        
+        # clear the UI
         self.classMenu.clear()
         self.fileList.clear()
+        self.assetsInfo.clear()
+        self.assets_btn_imp.setEnabled(False)
+        self.assets_btn_ref.setEnabled(False)
+        
+        
         query = 'select class_model, class_material, class_rig, class_fx from shows where showID = %s' % str(currentID)
         dbQuery = Query(query)
         try:
@@ -197,14 +208,16 @@ class AssetManagerUI(base_class, form_class):
         dbQuery = Query(query)
         
         result = ['(no files found)']
-        #print dbQuery.result, len(dbQuery.result)
-        if len(dbQuery.result):
-            #print dbQuery.result
-            result = [dbQuery.result[0]]
-            self.currentAssetID = str(dbQuery.result[1]) # assetID is the second item in the tuple
-            #print 'assetId: ', self.currentAssetID
-            
-        self.fileList.addItems(result)
+        try:
+            if len(dbQuery.result):
+                #print dbQuery.result
+                result = [dbQuery.result[0]]
+                self.currentAssetID = str(dbQuery.result[1]) # assetID is the second item in the tuple
+                #print 'assetId: ', self.currentAssetID
+                
+            self.fileList.addItems(result)
+        except:
+            pass
         
     
     def buildCategoriesMenu(self):
@@ -255,8 +268,7 @@ class AssetManagerUI(base_class, form_class):
         
         #self.currentID = int(currentID.toPyObject()) # TODO: see above, why is this working differently?
         self.currentID = currentID
-        print self.currentID
-      
+             
         # get the asset information based on the current show and category
         query = ('select assetID, asset_base_name from assets where showID = %s and category = "%s"' % (str(self.currentID), currentAssetCategory))
         sqlObj = Query(query)
@@ -285,6 +297,7 @@ class AssetManagerUI(base_class, form_class):
         self.moduleList.setPlainText(lines)
            
     def buildInfoBrowser(self):
+        self.assetsInfo.clear()
         if self.currentAssetID:
             selected = ''
             currentFile = ''
@@ -297,25 +310,43 @@ class AssetManagerUI(base_class, form_class):
                 
 
             filename = self.currentAsset
+            currentAssetName = 'model_' + self.currentAsset 
             query = 'select  filepath, assetID, submitDate, submitfile, createdBy, file_desc, file_comments from files where fileID = %s' % self.currentAssetID
+            prefix = ['Filepath\n', 'Asset ID', 'Date Submitted', 'File Submitted\n', 'Owner', 'Asset Description\n', 'Comments\n']
             desc = ['File:' ]
             dbQuery = Query(query)
             info = dict()
+            
+            # build the filename for the maya file
             try:
                 filename = pp.join(dbQuery.result[0], currentFileName)
+                
+                # activate the buttons: assets_btn_imp, assets_btn_ref
+                if pp.exists(filename):
+                    self.assets_btn_imp.setEnabled(True)
+                    self.assets_btn_ref.setEnabled(True)
+                    
+                    self.assets_btn_ref.pressed.connect(referenceFile(filename, currentAssetName, currentAssetName))
+                
                 self.currentFile =  filename
                 info['File'] = filename
             except:
                 pass
-            for res in dbQuery.result:
-                if type(res) == 'datetime.datetime':
-                    info['Date'] = res
+            
+            # build strings for the info area of the file
+            for res in dbQuery.result[1:]:
+                info[prefix[dbQuery.result.index(res)]] = str(res)
+
+
+
                 
                 #print res, ',', type(res)
         
-        print info
-        browserText = ''.join(info)
-        self.assetsInfo.setPlainText(browserText)
+        browserText = []
+        for k, v in info.iteritems():
+            browserText.append(str(k+': '+ v))
+        
+        self.assetsInfo.setPlainText('\n'.join(browserText))
         #cursor.close()
         
     #===========================================================================

@@ -1,6 +1,6 @@
 # fileIO.py by Michael Fessenden (c) 2011
 #
-# v0.30
+# v0.33
 #
 # Description :
 # -------------
@@ -9,7 +9,7 @@
 #
 # Version History :
 # -----------------
-# v0.32:
+# v0.33:
 # - development version
 #
 # TODO List :
@@ -19,11 +19,10 @@
 # ----------------------------------------------------------------------------
 
 import maya.cmds as mc
-from assetmanager.lib.am_os import listFolders, listFiles, dprint, eprint, outprint, sprint
 import posixpath as pp
 
-__version__ = '0.32'
-__lastupdate__ = 'Dec 09 2011'
+__version__ = '0.33'
+__lastupdate__ = 'Dec 11 2011'
 __repr__ = 'fileIO'
 __amlib__ = 'fileIO'
 __status__ = 'design'
