@@ -1,6 +1,6 @@
 # system.py by Michael Fessenden (c) 2011
 #
-# v0.35
+# v0.34
 #
 # Description :
 # -------------
@@ -34,7 +34,7 @@ import inspect
 from xml.etree import ElementTree as ET
 from xml.dom import minidom
 
-__version__ = '0.35'
+__version__ = '0.34'
 __lastupdate__ = 'Dec 13 2011'
 __repr__ = 'assetmanager.lib.system'
 __amlib__ = 'system'
