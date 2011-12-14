@@ -1,6 +1,6 @@
 # maya_func.py by Michael Fessenden (c) 2011
 #
-# v0.32
+# v0.34
 #
 # Description :
 # -------------
@@ -90,29 +90,7 @@ def recurseDag(dagpath, number):
         number -= 1
         recurseDag(curdag, str(number))
             
-#===============================================================================
-# def recurse(depth):
-#    if depth !=0:
-#        print 'num: %d' % depth
-#        recurse(depth-1)
-#===============================================================================
-#===============================================================================
-# def recurse(dagpath, depth=0):
-#    dag = dagpath.split('|')
-#    depth = len(dag)
-#    if depth !=0:
-#        print 'cur: %s' % dag
-#        recurse(dag, depth-1)   
-#===============================================================================
-            #===================================================================
-            # if not mc.objExists(p):
-            #    if not number:
-            #        print 'creating object: %s' % p
-            # number -= 1
-            #        #mc.group(empty=True, name=each, parent=curdag)
-            #    #else:
-            #        #curfdag = mc.group(empty=True, name=each, world=True)
-            #===================================================================
+
     
 #===============================================================================
 # GEOMETRY FUNCTIONS
