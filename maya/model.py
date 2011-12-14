@@ -1,6 +1,6 @@
 # model.py by Michael Fessenden (c) 2011
 #
-# v0.33
+# v0.34
 #
 # Description :
 # -------------
@@ -8,7 +8,7 @@
 #
 # Version History :
 # -----------------
-# v0.33:
+# v0.34:
 # - development version
 #
 # TODO List :
