@@ -1,5 +1,6 @@
 
 v.34:
+	- api documentation added
 	- added PyQt UI for Maya
 	- base classes added:
 		Query
