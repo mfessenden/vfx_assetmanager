@@ -15,7 +15,10 @@
 
 import posixpath as pp
 import os
-import maya.cmds as mc
+try:
+    import maya.cmds as mc
+except:
+    import maya.standalone
 from assetmanager.lib.system import Output
 
 __version__ = '0.34'
@@ -51,8 +54,10 @@ class am_mainMenu(object):
        mc.menu(self.name, label=self.label, parent=self.parent)
        
 
-
-uiObject = am_mainMenu()
+try:   
+    uiObject = am_mainMenu()
+except:
+    pass
  
 # add the submenus to the main menu
 mc.menu('am_mainMenu', edit=True)
