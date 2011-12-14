@@ -1,25 +1,17 @@
-# MAYA ASSETMANAGER:
+# vfx-assetmanager:
 
 REQUIRES:
 	Python 2.6
 	MySQL
-	
 	MySQL-python 1.2.3c1
-	PyQt, pip
-		http://code.google.com/p/pyqt4-win64-binaries/downloads/detail?name=PyQt-Py2.6-gpl-4.6-snapshot-20090810-1.exe&can=2&q=
+	PyQt4, pip
 	setuptools
 	Python OpenEXR
-			http://excamera.com/sphinx/articles-openexr.html#openexrpython
 
-# add to init.py in home/.nuke directory
-sys.path.append('C:/Users/michael/workspace')  # Add a path to import assetmanager
-sys.path.append('C:/Python26/Lib/site-packages')
-sys.path.append('C:/Program Files/Nuke6.2v2/plugins/nukescripts') # for PyQt
-
-os.environ['AM2_USER_LOGS'] = (os.environ['HOME']+'/'+'.am2')
-os.environ['AM2_SYSTEM_LOGS'] = 'C:/Users/michael/workspace/assetmanager/logs'
-
-'''
-from pyQtExamples import pyQtRender
-pyQtRender.startQtRenderDialog()
-'''
+ENVIRONMENT VARIABLES:
+	ASSET_MANAGER_LOC 	- directory that the assetmanager folder resides in
+	AM_SYSTEM_LOGS 		- location of the system logs)
+	AM_USER_LOGS 		- location of userlogs)
+	PIPELINE_LIB 		- library directory; location of the studio_startup.py script
+	PIPELINE_NUKE_LIB 	- location that Nuke will look to for dependent modules
+	PIPELINE_MAYA_LIB 	- location that Maya will look to for dependent modules
