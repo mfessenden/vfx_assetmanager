@@ -1,6 +1,6 @@
 # openexr.py by Michael Fessenden (c) 2011
 #
-# v0.31
+# v0.34
 #
 # Description :
 # -------------
@@ -10,7 +10,7 @@
 # Version History :
 # -----------------
 #
-# v0.32:
+# v0.34:
 # - development version
 #
 # TODO List :
@@ -23,7 +23,7 @@ import Imath
 #import Image
 import sys
 
-__version__ = '0.32'
+__version__ = '0.34'
 __lastupdate__ = 'Dec 08 2011'
 __repr__ = 'assetmanager.lib.openexr'
 __amlib__ = 'openexr'

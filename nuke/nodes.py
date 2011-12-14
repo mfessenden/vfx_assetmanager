@@ -1,6 +1,6 @@
 # nodes.py by Michael Fessenden (c) 2011
 #
-# v0.32
+# v0.34
 #
 # Description :
 # -------------
@@ -9,7 +9,7 @@
 #
 # Version History :
 # -----------------
-# v0.32:
+# v0.34:
 # - development version
 #
 # TODO List :
@@ -25,10 +25,10 @@ import nuke
 import os
 from assetmanager.lib.sql import Query
 
-__version__ = '0.32'
-__lastupdate__ = 'Dec 10 2011'
+__version__ = '0.34'
+__lastupdate__ = 'Dec 13 2011'
 __amlib__ = 'nodes'
-__status__ = 'production'
+__status__ = 'development'
 
 import __builtin__
 try:

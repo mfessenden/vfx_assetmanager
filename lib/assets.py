@@ -1,6 +1,6 @@
 # assets.py by Michael Fessenden (c) 2011
 #
-# v0.32
+# v0.34
 #
 # Description :
 # -------------
@@ -8,7 +8,7 @@
 #
 # Version History :
 # -----------------
-# v0.32:
+# v0.34:
 # - development version
 #
 # v0.31:
@@ -35,8 +35,8 @@ import re
 from assetmanager.lib.system import Output
 from assetmanager.lib.sql import Query
 
-__version__ = '0.32'
-__lastupdate__ = 'Dec 09 2011'
+__version__ = '0.34'
+__lastupdate__ = 'Dec 13 2011'
 __amlib__ = 'assets'
 __status__ = 'production'
 
@@ -161,7 +161,7 @@ class AssetBase(object):
             print 'no record found in database'
 
           
-    def update(self, updateData):
+    def update(self, assetID, *kwargs):
         ''' Update the asset record in the database, where "updateData" is a list of "column = data" strings'''
         newData = []
         

@@ -13,6 +13,9 @@
 #
 # Version History :
 # -----------------
+# v0.33:
+# - added menu function to dynamically 
+#
 # v0.32:
 # - changes to the signal/slot pyqt calls
 #

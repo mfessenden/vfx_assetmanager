@@ -1,6 +1,6 @@
 # system.py by Michael Fessenden (c) 2011
 #
-# v0.31
+# v0.34
 #
 # Description :
 # -------------
@@ -9,6 +9,9 @@
 #
 # Version History :
 # -----------------
+# v0.34:
+# - development version
+#
 # v0.33:
 # - added Catch
 #
@@ -31,8 +34,8 @@ import inspect
 from xml.etree import ElementTree as ET
 from xml.dom import minidom
 
-__version__ = '0.33'
-__lastupdate__ = 'Dec 07 2011'
+__version__ = '0.34'
+__lastupdate__ = 'Dec 13 2011'
 __repr__ = 'assetmanager.lib.system'
 __amlib__ = 'system'
 namespace = __name__
@@ -172,12 +175,14 @@ def browseDirectory(dir):
 
 class StudioPrefs(object):
     """
-    Class: StudioPrefs
-        Manages studio-wide preferences. Assetmanager looks for these settings to be stored in 
-        two files, located at the environment variable "AM_SETTINGS". The two files are named:
-            
-            projectSettings.xml        - default project settings (can vary from show to show)
-            studioSettings.xml         - preferences that are set globally for all users
+    Class: StudioPrefs()
+    
+        DESCRIPTION
+            Manages studio-wide preferences. Assetmanager looks for these settings to be stored in 
+            two files, located at the environment variable "AM_SETTINGS". The two files are named:
+                
+                projectSettings.xml        - default project settings (can vary from show to show)
+                studioSettings.xml         - preferences that are set globally for all users
 
         USAGE
             simply call the class; the AM_SETTINGS variable is set in the studio_startup.py
@@ -251,14 +256,15 @@ class Output(object):
         
             Determines how serious the message is
             
-            out:     standard output message (user log, screen)
-            sys:     system output (user log, system log, screen)
-            db:      debugging output (user db log, screen) 
-            warn:    warning output (user log, screen, system log)
-            err:     error (user log, screen, system log)
-            sqlerr:  sqlerror (all logs)
-            info:    info message (screen)
-            fatal:   you are so screwed...
+            out:         standard output message (user log, screen)
+            sys:         system output (user log, system log, screen)
+            db:          debugging output (user db log, screen) 
+            warn:        warning output (user log, screen, system log)
+            err:         error (user log, screen, system log)
+            sqlerr:      sqlerror (all logs)
+            info:        info message (screen)
+            fatal:       you are so screwed...
+            mayaerr:     maya error
              
          SCOPE
          
@@ -345,6 +351,14 @@ class Output(object):
             write = True
             scope = 'sys'
             prefix = self.formatMessagePrefix('[AM ERROR]')
+            logFiles = [usr_log, usr_error]
+            printMsg =  (prefix + ' %s: %s') % (self.shortdate, msg)
+            outputMsg =  (prefix + ' %s: %s (%s)') % (self.date, msg, self.user)
+        
+        if sev is 'mayaerr':
+            write = True
+            scope = 'sys'
+            prefix = self.formatMessagePrefix('[MAYA ERROR]')
             logFiles = [usr_log, usr_error]
             printMsg =  (prefix + ' %s: %s') % (self.shortdate, msg)
             outputMsg =  (prefix + ' %s: %s (%s)') % (self.date, msg, self.user)

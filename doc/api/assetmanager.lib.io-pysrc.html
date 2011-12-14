@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="ascii"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+          "DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>assetmanager.lib.io</title>
+  <link rel="stylesheet" href="epydoc.css" type="text/css" />
+  <script type="text/javascript" src="epydoc.js"></script>
+</head>
+
+<body bgcolor="white" text="black" link="blue" vlink="#204080"
+      alink="#204080">
+<!-- ==================== NAVIGATION BAR ==================== -->
+<table class="navbar" border="0" width="100%" cellpadding="0"
+       bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="middle">
+
+  <!-- Tree link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="module-tree.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Index link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="identifier-index.html">Indices</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Help link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Project homepage -->
+      <th class="navbar" align="right" width="100%">
+        <table border="0" cellpadding="0" cellspacing="0">
+          <tr><th class="navbar" align="center"
+            >assetmanager-api</th>
+          </tr></table></th>
+  </tr>
+</table>
+<table width="100%" cellpadding="0" cellspacing="0">
+  <tr valign="top">
+    <td width="100%">
+      <span class="breadcrumbs">
+        Package&nbsp;assetmanager ::
+        Package&nbsp;lib ::
+        Module&nbsp;io
+      </span>
+    </td>
+    <td>
+      <table cellpadding="0" cellspacing="0">
+        <!-- hide/show private -->
+        <tr><td align="right"><span class="options">[<a href="javascript:void(0);" class="privatelink"
+    onclick="toggle_private();">hide&nbsp;private</a>]</span></td></tr>
+        <tr><td align="right"><span class="options"
+            >[<a href="frames.html" target="_top">frames</a
+            >]&nbsp;|&nbsp;<a href="assetmanager.lib.io-pysrc.html"
+            target="_top">no&nbsp;frames</a>]</span></td></tr>
+      </table>
+    </td>
+  </tr>
+</table>
+<h1 class="epydoc">Source Code for <a href="assetmanager.lib.io-module.html">Module assetmanager.lib.io</a></h1>
+<pre class="py-src">
+<a name="L1"></a><tt class="py-lineno"> 1</tt>  <tt class="py-line"><tt class="py-comment"># io.py by Michael Fessenden (c) 2011</tt> </tt>
+<a name="L2"></a><tt class="py-lineno"> 2</tt>  <tt class="py-line"><tt class="py-comment">#</tt> </tt>
+<a name="L3"></a><tt class="py-lineno"> 3</tt>  <tt class="py-line"><tt class="py-comment"># v0.32</tt> </tt>
+<a name="L4"></a><tt class="py-lineno"> 4</tt>  <tt class="py-line"><tt class="py-comment">#</tt> </tt>
+<a name="L5"></a><tt class="py-lineno"> 5</tt>  <tt class="py-line"><tt class="py-comment"># Description :</tt> </tt>
+<a name="L6"></a><tt class="py-lineno"> 6</tt>  <tt class="py-line"><tt class="py-comment"># -------------</tt> </tt>
+<a name="L7"></a><tt class="py-lineno"> 7</tt>  <tt class="py-line"><tt class="py-comment"># This is the module that defines classes for parsing directories</tt> </tt>
+<a name="L8"></a><tt class="py-lineno"> 8</tt>  <tt class="py-line"><tt class="py-comment">#</tt> </tt>
+<a name="L9"></a><tt class="py-lineno"> 9</tt>  <tt class="py-line"><tt class="py-comment"># Version History :</tt> </tt>
+<a name="L10"></a><tt class="py-lineno">10</tt>  <tt class="py-line"><tt class="py-comment"># -----------------</tt> </tt>
+<a name="L11"></a><tt class="py-lineno">11</tt>  <tt class="py-line"><tt class="py-comment"># v0.32:</tt> </tt>
+<a name="L12"></a><tt class="py-lineno">12</tt>  <tt class="py-line"><tt class="py-comment"># - ** name changed from "browser" to "io"</tt> </tt>
+<a name="L13"></a><tt class="py-lineno">13</tt>  <tt class="py-line"><tt class="py-comment">#</tt> </tt>
+<a name="L14"></a><tt class="py-lineno">14</tt>  <tt class="py-line"><tt class="py-comment"># TODO List :</tt> </tt>
+<a name="L15"></a><tt class="py-lineno">15</tt>  <tt class="py-line"><tt class="py-comment"># -</tt> </tt>
+<a name="L16"></a><tt class="py-lineno">16</tt>  <tt class="py-line"><tt class="py-comment"># ----------------------------------------------------------------------------</tt> </tt>
+<a name="L17"></a><tt class="py-lineno">17</tt>  <tt class="py-line"> </tt>
+<a name="L18"></a><tt class="py-lineno">18</tt>  <tt class="py-line"><tt class="py-name">__version__</tt> <tt class="py-op">=</tt> <tt class="py-docstring">'0.32'</tt> </tt>
+<a name="L19"></a><tt class="py-lineno">19</tt>  <tt class="py-line"><tt id="link-0" class="py-name" targets="Variable assetmanager.lib.assets.__lastupdate__=assetmanager.lib.assets-module.html#__lastupdate__,Variable assetmanager.lib.io.__lastupdate__=assetmanager.lib.io-module.html#__lastupdate__,Variable assetmanager.lib.shows.__lastupdate__=assetmanager.lib.shows-module.html#__lastupdate__,Variable assetmanager.lib.sql.__lastupdate__=assetmanager.lib.sql-module.html#__lastupdate__,Variable assetmanager.lib.system.__lastupdate__=assetmanager.lib.system-module.html#__lastupdate__,Variable assetmanager.lib.users.__lastupdate__=assetmanager.lib.users-module.html#__lastupdate__"><a title="assetmanager.lib.assets.__lastupdate__
+assetmanager.lib.io.__lastupdate__
+assetmanager.lib.shows.__lastupdate__
+assetmanager.lib.sql.__lastupdate__
+assetmanager.lib.system.__lastupdate__
+assetmanager.lib.users.__lastupdate__" class="py-name" href="#" onclick="return doclink('link-0', '__lastupdate__', 'link-0');">__lastupdate__</a></tt> <tt class="py-op">=</tt> <tt class="py-string">'Dec 09 2011'</tt> </tt>
+<a name="L20"></a><tt class="py-lineno">20</tt>  <tt class="py-line"><tt id="link-1" class="py-name" targets="Variable assetmanager.lib.assets.__amlib__=assetmanager.lib.assets-module.html#__amlib__,Variable assetmanager.lib.io.__amlib__=assetmanager.lib.io-module.html#__amlib__,Variable assetmanager.lib.shows.__amlib__=assetmanager.lib.shows-module.html#__amlib__,Variable assetmanager.lib.sql.__amlib__=assetmanager.lib.sql-module.html#__amlib__,Variable assetmanager.lib.system.__amlib__=assetmanager.lib.system-module.html#__amlib__,Variable assetmanager.lib.users.__amlib__=assetmanager.lib.users-module.html#__amlib__"><a title="assetmanager.lib.assets.__amlib__
+assetmanager.lib.io.__amlib__
+assetmanager.lib.shows.__amlib__
+assetmanager.lib.sql.__amlib__
+assetmanager.lib.system.__amlib__
+assetmanager.lib.users.__amlib__" class="py-name" href="#" onclick="return doclink('link-1', '__amlib__', 'link-1');">__amlib__</a></tt> <tt class="py-op">=</tt> <tt class="py-string">'browser'</tt> </tt>
+<a name="L21"></a><tt class="py-lineno">21</tt>  <tt class="py-line"><tt id="link-2" class="py-name" targets="Variable assetmanager.lib.assets.__status__=assetmanager.lib.assets-module.html#__status__,Variable assetmanager.lib.io.__status__=assetmanager.lib.io-module.html#__status__,Variable assetmanager.lib.shows.__status__=assetmanager.lib.shows-module.html#__status__,Variable assetmanager.lib.sql.__status__=assetmanager.lib.sql-module.html#__status__,Variable assetmanager.lib.system.__status__=assetmanager.lib.system-module.html#__status__,Variable assetmanager.lib.users.__status__=assetmanager.lib.users-module.html#__status__"><a title="assetmanager.lib.assets.__status__
+assetmanager.lib.io.__status__
+assetmanager.lib.shows.__status__
+assetmanager.lib.sql.__status__
+assetmanager.lib.system.__status__
+assetmanager.lib.users.__status__" class="py-name" href="#" onclick="return doclink('link-2', '__status__', 'link-2');">__status__</a></tt> <tt class="py-op">=</tt> <tt class="py-string">'design'</tt> </tt>
+<a name="L22"></a><tt class="py-lineno">22</tt>  <tt class="py-line"> </tt>
+<a name="L23"></a><tt class="py-lineno">23</tt>  <tt class="py-line"><tt class="py-keyword">import</tt> <tt class="py-name">os</tt><tt class="py-op">,</tt> <tt class="py-name">re</tt> </tt>
+<a name="L24"></a><tt class="py-lineno">24</tt>  <tt class="py-line"> </tt>
+<a name="L25"></a><tt class="py-lineno">25</tt>  <tt class="py-line"><tt class="py-keyword">import</tt> <tt class="py-name">__builtin__</tt> </tt>
+<a name="L26"></a><tt class="py-lineno">26</tt>  <tt class="py-line"><tt class="py-keyword">try</tt><tt class="py-op">:</tt> </tt>
+<a name="L27"></a><tt class="py-lineno">27</tt>  <tt class="py-line">    <tt class="py-name">__builtin__</tt><tt class="py-op">.</tt><tt class="py-name">am_mods</tt><tt class="py-op">.</tt><tt id="link-3" class="py-name" targets="Method assetmanager.lib.system.UserPrefs.append()=assetmanager.lib.system.UserPrefs-class.html#append"><a title="assetmanager.lib.system.UserPrefs.append" class="py-name" href="#" onclick="return doclink('link-3', 'append', 'link-3');">append</a></tt><tt class="py-op">(</tt><tt class="py-name">__name__</tt> <tt class="py-op">+</tt> <tt class="py-string">' - ('</tt> <tt class="py-op">+</tt> <tt id="link-4" class="py-name"><a title="assetmanager.lib.assets.__status__
+assetmanager.lib.io.__status__
+assetmanager.lib.shows.__status__
+assetmanager.lib.sql.__status__
+assetmanager.lib.system.__status__
+assetmanager.lib.users.__status__" class="py-name" href="#" onclick="return doclink('link-4', '__status__', 'link-2');">__status__</a></tt> <tt class="py-op">+</tt> <tt class="py-string">'  v'</tt> <tt class="py-op">+</tt> <tt class="py-name">__version__</tt> <tt class="py-op">+</tt> <tt class="py-string">')\n'</tt> <tt class="py-op">+</tt> <tt class="py-name">__file__</tt> <tt class="py-op">+</tt> <tt class="py-string">'\n\n'</tt> <tt class="py-op">)</tt> </tt>
+<a name="L28"></a><tt class="py-lineno">28</tt>  <tt class="py-line"><tt class="py-keyword">except</tt><tt class="py-op">:</tt> </tt>
+<a name="L29"></a><tt class="py-lineno">29</tt>  <tt class="py-line">    <tt class="py-keyword">pass</tt> </tt>
+<a name="L30"></a><tt class="py-lineno">30</tt>  <tt class="py-line"> </tt>
+<a name="L31"></a><tt class="py-lineno">31</tt>  <tt class="py-line"> </tt>
+<a name="L32"></a><tt class="py-lineno">32</tt>  <tt class="py-line"> </tt>
+<a name="FileObj"></a><div id="FileObj-def"><a name="L33"></a><tt class="py-lineno">33</tt> <a class="py-toggle" href="#" id="FileObj-toggle" onclick="return toggle('FileObj');">-</a><tt class="py-line"><tt class="py-keyword">class</tt> <a class="py-def-name" href="assetmanager.lib.io.FileObj-class.html">FileObj</a><tt class="py-op">(</tt><tt class="py-base-class">object</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="FileObj-collapsed" style="display:none;" pad="++" indent="++++"></div><div id="FileObj-expanded"><a name="L34"></a><tt class="py-lineno">34</tt>  <tt class="py-line">    <tt class="py-docstring">"""</tt> </tt>
+<a name="L35"></a><tt class="py-lineno">35</tt>  <tt class="py-line"><tt class="py-docstring">    Class: FileObj()</tt> </tt>
+<a name="L36"></a><tt class="py-lineno">36</tt>  <tt class="py-line"><tt class="py-docstring">      </tt> </tt>
+<a name="L37"></a><tt class="py-lineno">37</tt>  <tt class="py-line"><tt class="py-docstring">    DESCRIPTION</tt> </tt>
+<a name="L38"></a><tt class="py-lineno">38</tt>  <tt class="py-line"><tt class="py-docstring">        File I/O class. Manages system operations independant of OS. Call this instead of posixpath.</tt> </tt>
+<a name="L39"></a><tt class="py-lineno">39</tt>  <tt class="py-line"><tt class="py-docstring">        Correctly passes system paths to and from Maya/Nuke/Houdini. It will alert you if a directory</tt> </tt>
+<a name="L40"></a><tt class="py-lineno">40</tt>  <tt class="py-line"><tt class="py-docstring">        does not exist and/or permissions are not set</tt> </tt>
+<a name="L41"></a><tt class="py-lineno">41</tt>  <tt class="py-line"><tt class="py-docstring">            </tt> </tt>
+<a name="L42"></a><tt class="py-lineno">42</tt>  <tt class="py-line"><tt class="py-docstring">    USAGE</tt> </tt>
+<a name="L43"></a><tt class="py-lineno">43</tt>  <tt class="py-line"><tt class="py-docstring">        Simply call the class</tt> </tt>
+<a name="L44"></a><tt class="py-lineno">44</tt>  <tt class="py-line"><tt class="py-docstring">        </tt> </tt>
+<a name="L45"></a><tt class="py-lineno">45</tt>  <tt class="py-line"><tt class="py-docstring"></tt> </tt>
+<a name="L46"></a><tt class="py-lineno">46</tt>  <tt class="py-line"><tt class="py-docstring">    """</tt> </tt>
+<a name="FileObj.__init__"></a><div id="FileObj.__init__-def"><a name="L47"></a><tt class="py-lineno">47</tt> <a class="py-toggle" href="#" id="FileObj.__init__-toggle" onclick="return toggle('FileObj.__init__');">-</a><tt class="py-line">    <tt class="py-keyword">def</tt> <a class="py-def-name" href="assetmanager.lib.io.FileObj-class.html#__init__">__init__</a><tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">,</tt> <tt class="py-param">path</tt><tt class="py-op">=</tt><tt class="py-string">''</tt><tt class="py-op">,</tt> <tt class="py-param">extension</tt><tt class="py-op">=</tt><tt class="py-string">''</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="FileObj.__init__-collapsed" style="display:none;" pad="++" indent="++++++++"></div><div id="FileObj.__init__-expanded"><a name="L48"></a><tt class="py-lineno">48</tt>  <tt class="py-line">        <tt class="py-keyword">pass</tt> </tt>
+</div></div><a name="L49"></a><tt class="py-lineno">49</tt>  <tt class="py-line">     </tt>
+<a name="L50"></a><tt class="py-lineno">50</tt>  <tt class="py-line">     </tt>
+<a name="L51"></a><tt class="py-lineno">51</tt>  <tt class="py-line">     </tt>
+<a name="L52"></a><tt class="py-lineno">52</tt>  <tt class="py-line">     </tt>
+<a name="removeJeditFiles"></a><div id="removeJeditFiles-def"><a name="L53"></a><tt class="py-lineno">53</tt> <a class="py-toggle" href="#" id="removeJeditFiles-toggle" onclick="return toggle('removeJeditFiles');">-</a><tt class="py-line"><tt class="py-keyword">def</tt> <a class="py-def-name" href="assetmanager.lib.io-module.html#removeJeditFiles">removeJeditFiles</a><tt class="py-op">(</tt><tt class="py-param">path</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="removeJeditFiles-collapsed" style="display:none;" pad="++" indent="++++"></div><div id="removeJeditFiles-expanded"><a name="L54"></a><tt class="py-lineno">54</tt>  <tt class="py-line">    <tt class="py-docstring">''' removes those annoying "~" files that JEdit leaves behind when editing files'''</tt> </tt>
+<a name="L55"></a><tt class="py-lineno">55</tt>  <tt class="py-line">    <tt class="py-name">results</tt> <tt class="py-op">=</tt> <tt class="py-op">[</tt><tt class="py-op">]</tt> </tt>
+<a name="L56"></a><tt class="py-lineno">56</tt>  <tt class="py-line">     </tt>
+<a name="L57"></a><tt class="py-lineno">57</tt>  <tt class="py-line">    <tt class="py-keyword">for</tt> <tt class="py-name">root</tt><tt class="py-op">,</tt> <tt class="py-name">dirs</tt><tt class="py-op">,</tt> <tt class="py-name">files</tt> <tt class="py-keyword">in</tt> <tt class="py-name">os</tt><tt class="py-op">.</tt><tt class="py-name">walk</tt><tt class="py-op">(</tt><tt class="py-name">path</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+<a name="L58"></a><tt class="py-lineno">58</tt>  <tt class="py-line">        <tt class="py-keyword">for</tt> <tt class="py-name">file</tt> <tt class="py-keyword">in</tt> <tt class="py-name">files</tt><tt class="py-op">:</tt> </tt>
+<a name="L59"></a><tt class="py-lineno">59</tt>  <tt class="py-line">            <tt class="py-name">filepath</tt> <tt class="py-op">=</tt> <tt class="py-op">(</tt><tt class="py-name">root</tt><tt class="py-op">+</tt><tt class="py-string">'/'</tt><tt class="py-op">+</tt><tt class="py-name">file</tt><tt class="py-op">)</tt> </tt>
+<a name="L60"></a><tt class="py-lineno">60</tt>  <tt class="py-line">            <tt class="py-name">filepath</tt> <tt class="py-op">=</tt> <tt class="py-name">filepath</tt><tt class="py-op">.</tt><tt class="py-name">replace</tt><tt class="py-op">(</tt><tt class="py-string">'\\'</tt><tt class="py-op">,</tt> <tt class="py-string">'/'</tt><tt class="py-op">)</tt> </tt>
+<a name="L61"></a><tt class="py-lineno">61</tt>  <tt class="py-line">            <tt class="py-name">result</tt> <tt class="py-op">=</tt> <tt class="py-name">re</tt><tt class="py-op">.</tt><tt class="py-name">search</tt><tt class="py-op">(</tt><tt class="py-string">r'\.[a-zA-Z]+~$'</tt><tt class="py-op">,</tt> <tt class="py-name">filepath</tt><tt class="py-op">)</tt> </tt>
+<a name="L62"></a><tt class="py-lineno">62</tt>  <tt class="py-line">            <tt class="py-keyword">try</tt><tt class="py-op">:</tt> </tt>
+<a name="L63"></a><tt class="py-lineno">63</tt>  <tt class="py-line">                <tt class="py-keyword">if</tt> <tt class="py-name">result</tt><tt class="py-op">.</tt><tt class="py-name">group</tt><tt class="py-op">(</tt><tt class="py-number">0</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+<a name="L64"></a><tt class="py-lineno">64</tt>  <tt class="py-line">                    <tt class="py-name">results</tt><tt class="py-op">.</tt><tt id="link-5" class="py-name"><a title="assetmanager.lib.system.UserPrefs.append" class="py-name" href="#" onclick="return doclink('link-5', 'append', 'link-3');">append</a></tt><tt class="py-op">(</tt><tt class="py-name">filepath</tt><tt class="py-op">)</tt> </tt>
+<a name="L65"></a><tt class="py-lineno">65</tt>  <tt class="py-line">            <tt class="py-keyword">except</tt><tt class="py-op">:</tt> </tt>
+<a name="L66"></a><tt class="py-lineno">66</tt>  <tt class="py-line">                <tt class="py-keyword">pass</tt> </tt>
+<a name="L67"></a><tt class="py-lineno">67</tt>  <tt class="py-line">     </tt>
+<a name="L68"></a><tt class="py-lineno">68</tt>  <tt class="py-line">     </tt>
+<a name="L69"></a><tt class="py-lineno">69</tt>  <tt class="py-line">    <tt class="py-keyword">for</tt> <tt class="py-name">result</tt> <tt class="py-keyword">in</tt> <tt class="py-name">results</tt><tt class="py-op">:</tt> </tt>
+<a name="L70"></a><tt class="py-lineno">70</tt>  <tt class="py-line">        <tt class="py-keyword">try</tt><tt class="py-op">:</tt> </tt>
+<a name="L71"></a><tt class="py-lineno">71</tt>  <tt class="py-line">            <tt class="py-name">os</tt><tt class="py-op">.</tt><tt class="py-name">remove</tt><tt class="py-op">(</tt><tt class="py-name">result</tt><tt class="py-op">)</tt> </tt>
+<a name="L72"></a><tt class="py-lineno">72</tt>  <tt class="py-line">            <tt class="py-keyword">print</tt> <tt class="py-string">'removing: %s'</tt> <tt class="py-op">%</tt> <tt class="py-name">result</tt> </tt>
+<a name="L73"></a><tt class="py-lineno">73</tt>  <tt class="py-line">        <tt class="py-keyword">except</tt><tt class="py-op">:</tt> </tt>
+<a name="L74"></a><tt class="py-lineno">74</tt>  <tt class="py-line">            <tt class="py-keyword">print</tt> <tt class="py-string">'cannot remmove: %s, perhaps the file is open?'</tt> <tt class="py-op">%</tt> <tt class="py-name">result</tt> </tt>
+</div><a name="L75"></a><tt class="py-lineno">75</tt>  <tt class="py-line"> </tt><script type="text/javascript">
+<!--
+expandto(location.href);
+// -->
+</script>
+</pre>
+<br />
+<!-- ==================== NAVIGATION BAR ==================== -->
+<table class="navbar" border="0" width="100%" cellpadding="0"
+       bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="middle">
+
+  <!-- Tree link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="module-tree.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Index link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="identifier-index.html">Indices</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Help link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Project homepage -->
+      <th class="navbar" align="right" width="100%">
+        <table border="0" cellpadding="0" cellspacing="0">
+          <tr><th class="navbar" align="center"
+            >assetmanager-api</th>
+          </tr></table></th>
+  </tr>
+</table>
+<table border="0" cellpadding="0" cellspacing="0" width="100%%">
+  <tr>
+    <td align="left" class="footer">
+    Generated by Epydoc 3.0.1 on Sun Dec 11 14:54:18 2011
+    </td>
+    <td align="right" class="footer">
+      <a target="mainFrame" href="http://epydoc.sourceforge.net"
+        >http://epydoc.sourceforge.net</a>
+    </td>
+  </tr>
+</table>
+
+<script type="text/javascript">
+  <!--
+  // Private objects are initially displayed (because if
+  // javascript is turned off then we want them to be
+  // visible); but by default, we want to hide them.  So hide
+  // them unless we have a cookie that says to show them.
+  checkCookie();
+  // -->
+</script>
+</body>
+</html>

@@ -1,0 +1,415 @@
+Setup:
+
+
+## Requirements:
+
+* Python 2.6
+
+* MySQL
+
+* PyQt
+
+* MySQL-python 1.2.3c1
+
+* pip
+
+* setuptools
+
+## Setup
+To use the tool, you'll need to define several environment variables and create a studio-wide startup module (one that is accessible by everyone on the network that will be using the tool). In this example, it is called **studio_startup.py**. It needs to be located at the location defined in the PIPELINE_LIB environment variable. The directory set to the PIPELINE_LIB variable is meant to store common modules that you will use for your pipeline, as well as directories specific to different applications.
+
+Because Nuke tends to be picky with the libraries that it works with (particularly PyQt), you'll need to define a library folder for the Nuke-specific scripts and set it as the value for the PIPELINE_NUKE_LIB variable. So create two directories under the PIPELINE_LIB folder called 'maya' and 'nuke' - and set the appropriate variables for each.
+
+* ASSET_MANAGER_LOC - directory that the assetmanager folder resides in
+* AM_SYSTEM_LOGS - location of the system logs)
+* AM_USER_LOGS - location of userlogs)
+* PIPELINE_LIB = library directory; location of the studio_startup.py script 
+* PIPELINE_NUKE_LIB = location that Nuke will look to for dependent modules
+* PIPELINE_MAYA_LIB = location that Maya will look to for dependent modules
+
+## Maya Setup
+To use the tool, you'll need to add to the (or create a) **userSetup.py** file (located in the user/maya/20XX/prefs/scripts) directory.
+```
+import maya.utils as utils
+import os, sys
+
+# ASSETMANAGER PYTHON LIBRARY LOCATIONS
+pylibloc = 'Z:/scripts/pylib' 		        # common libaries needed by all apps
+pylibMayaloc = 'Z:/scripts/pylib/maya'	        # libraries for use ONLY with Maya
+assetManagerLoc= 'Z:/pipeline' 		        # directory in which the assetmanager scripts reside
+
+# ADD THESE TO THE PYTHONPATH
+sys.path.append(pylibloc)
+sys.path.append(pylibMayaloc)
+sys.path.append(assetManagerLoc)
+
+# # SET ENVIRON VARIABLES
+os.environ['PIPELINE_LIB'] = pylibloc
+os.environ['PIPELINE_MAYA_LIB'] = pylibmayaloc
+os.environ['ASSET_MANAGER_LOC'] = amLoc
+
+print '[AM STARTUP]: Setting assetmanager environment variables'
+
+# CALL THE MAYA STARTUP FUNCTIONS
+utils.executeDeferred ('from studio_startup import studio_startup; studio_startup()')
+```
+## Nuke Setup
+The process for using assetmanager with Nuke is similar to Maya; you'll need to add the variables to your Nuke **menu.py** script (located in user/.nuke) directory.
+
+```
+import os, sys
+
+# ASSETMANAGER PYTHON LIBRARY LOCATIONS
+pylibloc = 'Z:/scripts/pylib'                 # common libaries needed by all apps
+pylibnukeloc = 'Z:/scripts/pylib/nuke'        # libraries for use ONLY with Nuke
+assetManagerLoc = 'Z:/pipeline'               # directory in which the assetmanager scripts reside
+
+# ADD THESE TO THE PYTHONPATH
+sys.path.append(pylibloc)
+sys.path.append(pylibnukeloc)
+sys.path.append(amLoc)
+
+# SET ENVIRON VARIABLES
+os.environ['PIPELINE_LIB'] = pylibloc
+os.environ['PIPELINE_NUKE_LIB'] = pylibnukeloc
+os.environ['ASSET_MANAGER_LOC'] = assetManagerLoc 
+
+print '[AM STARTUP]: Setting assetmanager environment variables'
+
+# CALL THE NUKE STARTUP FUNCTIONS
+from studio_startup import studio_startup
+studio_startup()
+```
+
+## Studio-specific Config
+
+The studio-specific preferences are stored in the root of the installation directory, in the **studio_prefs.ini** file. It is here that you can set the file mapping rules specific to your filesystem. Asset Manager uses these variables to resolve all of the paths and to build the database, so make sure that the paths are correct when using the tool in production. Bear in mind that you can redefine these variables on a show-by-show basis.
+
+*  @SHOWSROOT@ - (required) the root directory where your shows are stored. You can specify multiple locations if you have projects stored in different folders
+*  @RENDERROOT@ - (optional) the root directory where renders are stored. This is considered optional because some studios store renders in subdirectories of shot folders. By default, the @SHOTRENDERROOT@ variable is dependant on this varaiable; if you want Asset Manager to ignore the default setting, make sure that @RENDERROOT@ is not part of the @SHOTRENDERROOT@ variable.
+*  @SHOWASSETROOT@ - the directory where assets are stored for a given show
+*  @SHOWSHOTROOT@ - the directory where shots are stored for a given shot
+
+
+## MySQL Database
+
+Asset Manager will be looking to connect to a database named assets with four tables (assets, files, shots, shows, users). The SQL create statements are below: 
+
+
+	delimiter $$
+	
+	CREATE DATABASE `assets` /*!40100 DEFAULT CHARACTER SET latin1 */$$
+	
+	delimiter $$
+	
+	CREATE TABLE `assets` (
+	  `assetID` int(11) NOT NULL AUTO_INCREMENT,
+	  `showID` int(11) DEFAULT NULL,
+	  `category` varchar(45) DEFAULT NULL COMMENT 'type of 3D asset',
+	  `isDirty` tinyint(1) NOT NULL,
+	  `3D` tinyint(1) DEFAULT NULL COMMENT 'flag for 3D assets',
+	  `assetName` varchar(45) DEFAULT NULL COMMENT 'name of the asset',
+	  `assetType` varchar(45) DEFAULT NULL COMMENT 'type of asset',
+	  `show_name` varchar(45) DEFAULT NULL COMMENT 'the show that the current asset belongs to',
+	  `assetRoot` varchar(45) DEFAULT NULL COMMENT 'root directory for this asset (if it has one)',
+	  `modelLoc` varchar(4000) DEFAULT NULL COMMENT 'model location of this asset',
+	  `rigLoc` varchar(4000) DEFAULT NULL COMMENT 'rig location of this asset',
+	  `materialLoc` varchar(4000) DEFAULT NULL COMMENT 'material location of this asset',
+	  `shot_sequence` varchar(45) DEFAULT NULL COMMENT 'if the asset type is a shot, the sequence that the shot belongs to',
+	  `compRoot` varchar(400) DEFAULT NULL,
+	  `rotoRoot` varchar(400) DEFAULT NULL,
+	  `plateRoot` varchar(4000) DEFAULT NULL COMMENT 'plate directory of this asset',
+	  `trackRoot` varchar(4000) DEFAULT NULL COMMENT '3D tracking root of this asset',
+	  `mayaRoot` varchar(4000) DEFAULT NULL COMMENT 'maya root of this asset',
+	  `lightRoot` varchar(4000) DEFAULT NULL COMMENT 'lighting root for this asset',
+	  `animRoot` varchar(4000) DEFAULT NULL COMMENT 'animation root for this asset',
+	  `fxRoot` varchar(4000) DEFAULT NULL COMMENT 'FX root for this asset',
+	  `layoutRoot` varchar(4000) DEFAULT NULL COMMENT 'layout root for this asset',
+	  `asset_desc` text COMMENT 'description of the asset',
+	  `frame_start` int(11) DEFAULT NULL COMMENT 'start frame for the shot	',
+	  `frame_end` int(11) DEFAULT NULL COMMENT 'end frame for the shot	',
+	  PRIMARY KEY (`assetID`)
+	) ENGINE=MyISAM AUTO_INCREMENT=37 DEFAULT CHARSET=latin1 COMMENT='The asset globals; this stores the asset names and file rule'$$
+	
+	delimiter $$
+	
+	CREATE TABLE `files` (
+	  `fileID` int(11) NOT NULL AUTO_INCREMENT,
+	  `assetID` int(11) DEFAULT NULL COMMENT 'the ID of the asset that this file is a part of',
+	  `showID` int(11) DEFAULT NULL COMMENT 'the ID of the show that this asset belongs to',
+	  `asset_category` varchar(100) DEFAULT NULL,
+	  `asset_name` varchar(100) DEFAULT NULL COMMENT 'The asset name that this file belongs to',
+	  `asset_class` varchar(100) DEFAULT NULL,
+	  `filename` text COMMENT 'the name of the file',
+	  `filepath` text COMMENT 'the absolute path to the file',
+	  `version` int(11) DEFAULT NULL COMMENT 'version of the asset',
+	  `show_name` varchar(100) DEFAULT NULL COMMENT 'the show that the asset belongs to',
+	  `submitdate` datetime DEFAULT NULL COMMENT 'date of the file submission',
+	  `submitfile` text COMMENT 'the file that the element was subitted from',
+	  `createdby` varchar(100) DEFAULT NULL COMMENT 'user that submitted this file',
+	  `file_desc` text COMMENT 'asset description',
+	  `file_comments` text COMMENT 'comments added to this file',
+	  `file_app` varchar(45) DEFAULT NULL COMMENT 'the program used to create or read this file',
+	  `asset_type` varchar(100) DEFAULT NULL COMMENT 'type of file asset (render, 3d model, 3d rig, camera track, lightrig, assembly, nuke comp, nuke precomp, roto)',
+	  `frame_start` int(11) DEFAULT NULL,
+	  `frame_end` int(11) DEFAULT NULL,
+	  `format` varchar(100) DEFAULT NULL COMMENT 'for file sequences, the format for nuke',
+	  PRIMARY KEY (`fileID`)
+	) ENGINE=MyISAM AUTO_INCREMENT=27 DEFAULT CHARSET=latin1$$
+	
+	delimiter $$
+	
+	CREATE TABLE `shows` (
+	  `showID` int(11) NOT NULL AUTO_INCREMENT,
+	  `active` tinyint(1) DEFAULT NULL COMMENT 'is the show currently active?',
+	  `show_name` varchar(45) DEFAULT NULL COMMENT 'the current show name',
+	  `showRoot` varchar(4000) DEFAULT NULL COMMENT 'Root directory for the show (absolute)',
+	  `showRenderRoot` varchar(4000) DEFAULT NULL COMMENT 'Root directory for the show renders (absolute)',
+	  `showDesc` text COMMENT 'show description',
+	  `showPrefix` varchar(10) DEFAULT NULL COMMENT 'Prefix used for shot naming, etc',
+	  `showAssetRoot` varchar(4000) DEFAULT NULL COMMENT 'Root directory for the show assets (relative)',
+	  `showShotRoot` varchar(4000) DEFAULT NULL COMMENT 'Root directory for the show shots (relative)',
+	  `showTexRoot` varchar(4000) DEFAULT NULL COMMENT 'Root directory for the show textures (relative)',
+	  `lightRoot` varchar(4000) DEFAULT NULL COMMENT 'Root directory for the show maya lighting directory (relative)',
+	  `animRoot` varchar(4000) DEFAULT NULL COMMENT 'Root directory for the show maya aimation directory (relative)',
+	  `animLayerRoot` varchar(4000) DEFAULT NULL COMMENT 'Root directory for the show maya animation directory - layered (relative)',
+	  `animCacheRoot` varchar(4000) DEFAULT NULL COMMENT 'Root directory for the show maya animation geometry cache directory (relative)',
+	  `animCacheLayerRoot` varchar(4000) DEFAULT NULL COMMENT 'Root directory for the show maya animation geometry cache directory - layered (relative)',
+	  `trackRoot` varchar(4000) DEFAULT NULL COMMENT 'Root directory for the show 3D tracking directory (relative)',
+	  `shotRenderRoot` varchar(4000) DEFAULT NULL,
+	  `assetRootModels` varchar(4000) DEFAULT NULL,
+	  `assetRootMaterials` varchar(4000) DEFAULT NULL,
+	  `assetRootRig` varchar(4000) DEFAULT NULL,
+	  `assetRootFur` varchar(4000) DEFAULT NULL,
+	  `category_actor` varchar(100) DEFAULT NULL COMMENT 'category tag for actor assets',
+	  `category_prop` varchar(100) DEFAULT NULL COMMENT 'category tag for prop assets',
+	  `category_env` varchar(100) DEFAULT NULL COMMENT 'category tag for environment assets',
+	  `category_tex` varchar(100) DEFAULT NULL COMMENT 'category tag for texture assets',
+	  `category_assem` varchar(100) DEFAULT NULL COMMENT 'category tag for assembly assets',
+	  `category_extra` varchar(100) DEFAULT NULL COMMENT 'extra asset category tags (separated by commas)',
+	  `class_model` varchar(45) DEFAULT NULL COMMENT 'tag for models',
+	  `class_material` varchar(45) DEFAULT NULL COMMENT 'tag for shaders & materials',
+	  `class_rig` varchar(45) DEFAULT NULL COMMENT 'tag for rigged characters & props',
+	  `class_fx` varchar(45) DEFAULT NULL COMMENT 'tag for FX shots	',
+	  `shotCompRoot` text COMMENT 'the comp root',
+	  `show_format` varchar(100) DEFAULT NULL COMMENT 'format data for the show (resolution, aspect ratio etc.)',
+	  `sequences` text COMMENT 'metadat containing the sequences data for the show',
+	  PRIMARY KEY (`showID`)
+	) ENGINE=MyISAM AUTO_INCREMENT=20 DEFAULT CHARSET=latin1 COMMENT='Show globals - stores information such as 2D/3D file rules, '$$
+	
+	delimiter $$
+	
+	CREATE TABLE `users` (
+	  `userID` int(11) NOT NULL AUTO_INCREMENT,
+	  `admin` tinyint(1) DEFAULT NULL COMMENT 'flag for admins',
+	  `devuser` tinyint(1) DEFAULT NULL COMMENT 'flag for development users',
+	  `username` varchar(45) DEFAULT NULL COMMENT 'user name of the current user',
+	  `user_role` varchar(45) DEFAULT NULL COMMENT 'the role of the artist/user	',
+	  `showID` int(11) DEFAULT NULL COMMENT 'user preference to store the current showID',
+	  `current_proj` text COMMENT 'current maya project',
+	  `recent_proj` text COMMENT 'comma-deliniated list of recent projects',
+	  `global_prefs` longtext COMMENT 'Global variables (in python) for this user across all applications',
+	  `nuke_prefs` longtext COMMENT 'preferences specific to Nuke',
+	  `maya_prefs` longtext COMMENT 'preferences specific to Maya',
+	  `houdini_prefs` longtext COMMENT 'preferences specific to Houdini',
+	  PRIMARY KEY (`userID`)
+	) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=latin1 COMMENT='store user data and preferences for the asset management too'$$
+	
+	delimiter $$
+
+	CREATE TABLE `shots` (
+	  `shotID` int(11) NOT NULL AUTO_INCREMENT,
+	  `showID` int(11) DEFAULT NULL COMMENT 'the ID of the show that this shot belongs to',
+	  `shot_name` varchar(400) DEFAULT NULL COMMENT 'the name of the shot',
+	  `shot_root` varchar(400) DEFAULT NULL COMMENT 'the root directory for this shot',
+	  `frame_start` int(11) DEFAULT NULL COMMENT 'start frame',
+	  `frame_end` int(11) DEFAULT NULL COMMENT 'end frame',
+	  `handle_length` int(11) DEFAULT NULL COMMENT 'handle frame length',
+	  `shot_sequence` varchar(45) DEFAULT NULL COMMENT 'the sequence that the shot belongs to',
+	  `shot_desc` text COMMENT 'description of the shot',
+	  `shot_comp_root` varchar(400) DEFAULT NULL COMMENT 'compositing root for the shot',
+	  `shot_plate_root` varchar(400) DEFAULT NULL COMMENT 'location of the plates for the shot	',
+	  `shot_roto_root` varchar(400) DEFAULT NULL COMMENT 'roto root for the shot',
+	  `shot_track_root` varchar(400) DEFAULT NULL COMMENT 'tracking root for the shot',
+	  `shot_asset_root` varchar(400) DEFAULT NULL COMMENT '3D asset root for the shot',
+	  `maya_root` varchar(400) DEFAULT NULL COMMENT 'root directory for maya assets (light, animation, fx etc)',
+	  `houdini_root` varchar(400) DEFAULT NULL COMMENT 'root directory for houdini assets (light, animation, fx etc)',
+	  `shot_light_root` varchar(400) DEFAULT NULL COMMENT 'lighting root for the shot',
+	  `shot_animation_root` varchar(400) DEFAULT NULL COMMENT 'animation root for the shot',
+	  `shot_fx_root` varchar(400) DEFAULT NULL COMMENT 'FX root for the shot',
+	  PRIMARY KEY (`shotID`)
+	) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=latin1 COMMENT='data for shots'$$
+
+
+
+* [Overview](https://github.com/mfessenden/vfx-assetmanager/wiki/Overview)
+* [Installation](https://github.com/mfessenden/vfx-assetmanager/wiki/Installation)
+* [Maya Workflow](https://github.com/mfessenden/vfx-assetmanager/wiki/Maya-workflow)
+* [Nuke Workflow](https://github.com/mfessenden/vfx-assetmanager/wiki/Nuke-Workflow)
+
+
+
+
+Overview
+
+Asset Manager is a tool to manage visual effects assets through various stages of production. It creates Python classes that define asset properties, be it a Maya scene, Nuke script, image sequence etc. Driven by a MySQL database, it can quickly access asset data (such as file location, creation or revision info) in both Maya and Nuke.
+
+The first step entails tagging models with custom attributes that persist through rigging, animation and lighting. Models are tagged and automatically cached upon submission into the animation pipeline, while their textured counterparts can pick up the cache later for lighting, neatly separating the process of animation and lighting. This allows for much more lightweight lighting scenes, without the extra overhead of rigging and deformers.
+
+This is a Python rewrite of an older MEL tool that I wrote last year:
+[[http://www.michaelfessenden.com/?p=203]]
+
+![Asset Manager UI](http://www.michaelfessenden.com/wp-content/uploads/2011/08/am2_ui1.gif)
+
+
+Installation
+
+## Requirements:
+
+* Python 2.6
+
+* MySQL
+
+* PyQt
+
+* MySQL-python 1.2.3c1
+
+* pip
+
+* setuptools
+
+## Maya Environment Variables
+* ASSET_MANAGER2_LOC - root directory of the install
+* AM2_SYSTEM_LOGS - location of the system logs)
+* AM2_USER_LOGS - location of userlogs)
+
+## Studio-specific Config
+
+The studio-specific preferences are stored in the root of the installation directory, in the **studio_prefs.ini** file. It is here that you can set the file mapping rules specific to your filesystem. Asset Manager uses these variables to resolve all of the paths and to build the database, so make sure that the paths are correct when using the tool in production. Bear in mind that you can redefine these variables on a show-by-show basis.
+
+*  @SHOWSROOT@ - (required) the root directory where your shows are stored. You can specify multiple locations if you have projects stored in different folders
+*  @RENDERROOT@ - (optional) the root directory where renders are stored. This is considered optional because some studios store renders in subdirectories of shot folders. By default, the @SHOTRENDERROOT@ variable is dependant on this varaiable; if you want Asset Manager to ignore the default setting, make sure that @RENDERROOT@ is not part of the @SHOTRENDERROOT@ variable.
+*  @SHOWASSETROOT@ - the directory where assets are stored for a given show
+*  @SHOWSHOTROOT@ - the directory where shots are stored for a given shot
+
+
+## MySQL Database
+
+Asset Manager will be looking to connect to a database named assets with four tables (users, assetfiles, assetglobals, showglobals). The SQL create statements are below:
+``    
+    
+    CREATE DATABASE `assets` /*!40100 DEFAULT CHARACTER SET latin1 */$$
+    
+    
+    CREATE TABLE `assetfiles` (
+      `fileID` int(11) NOT NULL AUTO_INCREMENT,
+      `asset_name` varchar(100) DEFAULT NULL COMMENT 'The asset name that this file belongs to',
+      `asset_class` varchar(100) DEFAULT NULL,
+      `asset_category` varchar(100) DEFAULT NULL,
+      `show_name` varchar(100) DEFAULT NULL COMMENT 'the show that the asset belongs to',
+      `submitdate` datetime DEFAULT NULL COMMENT 'date of the file submission',
+      `createdby` varchar(100) DEFAULT NULL COMMENT 'user that submitted this file',
+      `filepath` text COMMENT 'the absolute path to the file',
+      `file_desc` text COMMENT 'asset description',
+      `file_comments` text COMMENT 'comments added to this file',
+      `file_app` varchar(45) DEFAULT NULL COMMENT 'the program used to create or read this file',
+      `asset_type` varchar(100) DEFAULT NULL COMMENT 'type of file asset (render, 3d model, 3d rig, camera track, lightrig, assembly, nuke comp, nuke precomp, roto)',
+      PRIMARY KEY (`fileID`)
+    ) ENGINE=MyISAM AUTO_INCREMENT=10 DEFAULT CHARSET=latin1$$
+    
+    
+    CREATE TABLE `assetglobals` (
+      `assetID` int(11) NOT NULL AUTO_INCREMENT,
+      `isDirty` tinyint(1) NOT NULL,
+      `3D` tinyint(1) DEFAULT NULL COMMENT 'flag for 3D assets',
+      `assetName` varchar(45) DEFAULT NULL COMMENT 'name of the asset',
+      `assetType` varchar(45) DEFAULT NULL COMMENT 'type of asset',
+      `assetShow` varchar(45) DEFAULT NULL COMMENT 'the show that the current asset belongs to',
+      `assetRoot` varchar(45) DEFAULT NULL COMMENT 'root directory for this asset (if it has one)',
+      `category` varchar(45) DEFAULT NULL COMMENT 'type of 3D asset',
+      `modelLoc` varchar(4000) DEFAULT NULL COMMENT 'model location of this asset',
+      `rigLoc` varchar(4000) DEFAULT NULL COMMENT 'rig location of this asset',
+      `materialLoc` varchar(4000) DEFAULT NULL COMMENT 'material location of this asset',
+      `plateRoot` varchar(4000) DEFAULT NULL COMMENT 'plate directory of this asset',
+      `trackRoot` varchar(4000) DEFAULT NULL COMMENT '3D tracking root of this asset',
+      `mayaRoot` varchar(4000) DEFAULT NULL,
+      `lightRoot` varchar(4000) DEFAULT NULL,
+      `animRoot` varchar(4000) DEFAULT NULL,
+      `fxRoot` varchar(4000) DEFAULT NULL,
+      `layoutRoot` varchar(4000) DEFAULT NULL,
+      `asset_desc` text COMMENT 'description of the asset',
+      PRIMARY KEY (`assetID`)
+    ) ENGINE=MyISAM AUTO_INCREMENT=34 DEFAULT CHARSET=latin1 COMMENT='The asset globals; this stores the asset names and file rule'$$
+    
+    
+    
+    CREATE TABLE `showglobals` (
+      `showID` int(11) NOT NULL AUTO_INCREMENT,
+      `showName` varchar(45) DEFAULT NULL COMMENT 'the current show name',
+      `showRoot` varchar(4000) DEFAULT NULL COMMENT 'Root directory for the show (absolute)',
+      `showRenderRoot` varchar(4000) DEFAULT NULL COMMENT 'Root directory for the show renders (absolute)',
+      `showDesc` text COMMENT 'show description',
+      `showPrefix` varchar(10) DEFAULT NULL COMMENT 'Prefix used for shot naming, etc',
+      `showAssetRoot` varchar(4000) DEFAULT NULL COMMENT 'Root directory for the show assets (relative)',
+      `showShotRoot` varchar(4000) DEFAULT NULL COMMENT 'Root directory for the show shots (relative)',
+      `showTexRoot` varchar(4000) DEFAULT NULL COMMENT 'Root directory for the show textures (relative)',
+      `lightRoot` varchar(4000) DEFAULT NULL COMMENT 'Root directory for the show maya lighting directory (relative)',
+      `animRoot` varchar(4000) DEFAULT NULL COMMENT 'Root directory for the show maya aimation directory (relative)',
+      `animLayerRoot` varchar(4000) DEFAULT NULL COMMENT 'Root directory for the show maya animation directory - layered (relative)',
+      `animCacheRoot` varchar(4000) DEFAULT NULL COMMENT 'Root directory for the show maya animation geometry cache directory (relative)',
+      `animCacheLayerRoot` varchar(4000) DEFAULT NULL COMMENT 'Root directory for the show maya animation geometry cache directory - layered (relative)',
+      `trackRoot` varchar(4000) DEFAULT NULL COMMENT 'Root directory for the show 3D tracking directory (relative)',
+      `shotRenderRoot` varchar(4000) DEFAULT NULL,
+      `assetRootModels` varchar(4000) DEFAULT NULL,
+      `assetRootMaterials` varchar(4000) DEFAULT NULL,
+      `assetRootRig` varchar(4000) DEFAULT NULL,
+      `assetRootFur` varchar(4000) DEFAULT NULL,
+      `category_actor` varchar(100) DEFAULT NULL COMMENT 'category tag for actor assets',
+      `category_prop` varchar(100) DEFAULT NULL COMMENT 'category tag for prop assets',
+      `category_env` varchar(100) DEFAULT NULL COMMENT 'category tag for environment assets',
+      `category_tex` varchar(100) DEFAULT NULL COMMENT 'category tag for texture assets',
+      `category_assem` varchar(100) DEFAULT NULL COMMENT 'category tag for assembly assets',
+      `category_extra` varchar(100) DEFAULT NULL COMMENT 'extra asset category tags (separated by commas)',
+      `class_model` varchar(45) DEFAULT NULL,
+      `class_material` varchar(45) DEFAULT NULL,
+      `class_rig` varchar(45) DEFAULT NULL,
+      `class_fx` varchar(45) DEFAULT NULL,
+      PRIMARY KEY (`showID`)
+    ) ENGINE=MyISAM AUTO_INCREMENT=19 DEFAULT CHARSET=latin1 COMMENT='The central database that holds all of the asset names and r'$$
+    
+    
+    
+    CREATE TABLE `users` (
+      `userID` int(11) NOT NULL AUTO_INCREMENT,
+      `username` varchar(45) DEFAULT NULL,
+      `user_role` varchar(45) DEFAULT NULL COMMENT 'the role of the artist/user    ',
+      `current_show` varchar(100) DEFAULT NULL,
+      `current_proj` text COMMENT 'the last maya project',
+      `recent_proj` text COMMENT 'comma-deliniated list of recent projects',
+      PRIMARY KEY (`userID`)
+    ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=latin1 COMMENT='store user data for the asset management tool'$$
+    
+
+
+
+
+
+``
+
+
+### 1) Define an asset
+
+You can either use the built in command, or simply tag whatever objects are already in your scene. This establishes the name of the asset, and whatever category (actor, props, environments) you have defined for the show. Directories for the various categories and classes are automatically created by the tool.
+
+Choose ���New Asset��� from the Assets menu, or right-click in the assets list on the right side of the UI and choose ���New Asset���.
+
+### 2) Tag and submit the model
+
+The objects are cleaned up automatically: history is deleted, objects are assigned tags and the intialShadingGroup. There is no need to save off shaders, those are stored in the materials folder and called in when needed. This is done so that there are no shading group overrides when an asset is initially referenced into a scene, and won't break render layers if the shaders are changed (unless the names of objects change)
+
+### 3) Rig the model
+
+Right-click on the asset name in the UI and choose 'create new rig'. This references the model into your scene, creates a work folder in the rig area of the asset directory, and saves it.
+
+To submit the rig, choose ���Submit Rig��� under the Rigging menu. Make sure the top node of the rig is selected, check the name and click Submit.
+

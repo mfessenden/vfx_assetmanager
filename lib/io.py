@@ -1,6 +1,6 @@
 # io.py by Michael Fessenden (c) 2011
 #
-# v0.33
+# v0.34
 #
 # Description :
 # -------------
@@ -8,6 +8,9 @@
 #
 # Version History :
 # -----------------
+# v0.34:
+# -
+#
 # v0.33:
 # - ** name changed from "browser" to "io"
 #
@@ -15,8 +18,8 @@
 # -
 # ----------------------------------------------------------------------------
 
-__version__ = '0.33'
-__lastupdate__ = 'Dec 09 2011'
+__version__ = '0.34'
+__lastupdate__ = 'Dec 13 2011'
 __amlib__ = 'browser'
 __status__ = 'design'
 

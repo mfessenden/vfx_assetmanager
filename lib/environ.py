@@ -17,8 +17,13 @@
 # 
 # ----------------------------------------------------------------------------
 
-__version__ = '0.33'
-__lastupdate__ = 'Dec 11 2011'
+import os
+import maya.cmds as mc
+
+from assetmanager.lib.system import Output
+
+__version__ = '0.34'
+__lastupdate__ = 'Dec 13 2011'
 __repr__ = 'assetmanager.lib.environ'
 __amlib__ = 'environ'
 namespace = __name__
@@ -33,12 +38,13 @@ __status__ = 'development'
 # os.environ['ASSET_MANAGER_PY_LOC']     : assetmanager application directory
 
 
-class EnvironVars(object):
+class Environ(object):
     """
-    Class: EnvironVars()
+    Class: Environ()
     
     DESCRIPTION
-        this class maintains, reads and sets environment variables used by the application
+        this class maintains, reads and sets environment variables used by the application.
+        Allows the user to set & retrieve boolean environment variables
         
     USAGE
         Simply call the class.
@@ -47,7 +53,36 @@ class EnvironVars(object):
     def __init__(self):
         print 'loading environment module'
     
-    @ property
+    @staticmethod
+    def set(**kwargs):
+        for arg in kwargs:
+            print arg
+            
+    @staticmethod
+    def exists(env):
+        try:
+            val = os.environ[env]
+            return 1
+        except:
+            return 0
+            
+    @staticmethod
+    def get(env):
+        """ just get the environment variable"""
+        if env:
+            try:
+                var = os.environ[env]
+                if var == '0':
+                    return 0
+                if var == '1':
+                    return 1
+            except:
+                var = 0
+            return var
+        else:
+            return 0
+            
+    
     def _update(self):
         """ updates all of the envVars"""
         print 'updating environment variables'

@@ -1,0 +1,310 @@
+<?xml version="1.0" encoding="ascii"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+          "DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>assetmanager.lib.sql</title>
+  <link rel="stylesheet" href="epydoc.css" type="text/css" />
+  <script type="text/javascript" src="epydoc.js"></script>
+</head>
+
+<body bgcolor="white" text="black" link="blue" vlink="#204080"
+      alink="#204080">
+<!-- ==================== NAVIGATION BAR ==================== -->
+<table class="navbar" border="0" width="100%" cellpadding="0"
+       bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="middle">
+
+  <!-- Tree link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="module-tree.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Index link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="identifier-index.html">Indices</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Help link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Project homepage -->
+      <th class="navbar" align="right" width="100%">
+        <table border="0" cellpadding="0" cellspacing="0">
+          <tr><th class="navbar" align="center"
+            >assetmanager-api</th>
+          </tr></table></th>
+  </tr>
+</table>
+<table width="100%" cellpadding="0" cellspacing="0">
+  <tr valign="top">
+    <td width="100%">
+      <span class="breadcrumbs">
+        Package&nbsp;assetmanager ::
+        Package&nbsp;lib ::
+        Module&nbsp;sql
+      </span>
+    </td>
+    <td>
+      <table cellpadding="0" cellspacing="0">
+        <!-- hide/show private -->
+        <tr><td align="right"><span class="options">[<a href="javascript:void(0);" class="privatelink"
+    onclick="toggle_private();">hide&nbsp;private</a>]</span></td></tr>
+        <tr><td align="right"><span class="options"
+            >[<a href="frames.html" target="_top">frames</a
+            >]&nbsp;|&nbsp;<a href="assetmanager.lib.sql-pysrc.html"
+            target="_top">no&nbsp;frames</a>]</span></td></tr>
+      </table>
+    </td>
+  </tr>
+</table>
+<h1 class="epydoc">Source Code for <a href="assetmanager.lib.sql-module.html">Module assetmanager.lib.sql</a></h1>
+<pre class="py-src">
+<a name="L1"></a><tt class="py-lineno">  1</tt>  <tt class="py-line"><tt class="py-comment"># sql.py by Michael Fessenden (c) 2011</tt> </tt>
+<a name="L2"></a><tt class="py-lineno">  2</tt>  <tt class="py-line"><tt class="py-comment">#</tt> </tt>
+<a name="L3"></a><tt class="py-lineno">  3</tt>  <tt class="py-line"><tt class="py-comment"># v0.32</tt> </tt>
+<a name="L4"></a><tt class="py-lineno">  4</tt>  <tt class="py-line"><tt class="py-comment">#</tt> </tt>
+<a name="L5"></a><tt class="py-lineno">  5</tt>  <tt class="py-line"><tt class="py-comment"># Description :</tt> </tt>
+<a name="L6"></a><tt class="py-lineno">  6</tt>  <tt class="py-line"><tt class="py-comment"># -------------</tt> </tt>
+<a name="L7"></a><tt class="py-lineno">  7</tt>  <tt class="py-line"><tt class="py-comment"># Query is simple a wrapper for connecting to the MySQL database</tt> </tt>
+<a name="L8"></a><tt class="py-lineno">  8</tt>  <tt class="py-line"><tt class="py-comment">#</tt> </tt>
+<a name="L9"></a><tt class="py-lineno">  9</tt>  <tt class="py-line"><tt class="py-comment">#</tt> </tt>
+<a name="L10"></a><tt class="py-lineno"> 10</tt>  <tt class="py-line"><tt class="py-comment"># Version History :</tt> </tt>
+<a name="L11"></a><tt class="py-lineno"> 11</tt>  <tt class="py-line"><tt class="py-comment"># -----------------</tt> </tt>
+<a name="L12"></a><tt class="py-lineno"> 12</tt>  <tt class="py-line"><tt class="py-comment"># v0.32:</tt> </tt>
+<a name="L13"></a><tt class="py-lineno"> 13</tt>  <tt class="py-line"><tt class="py-comment"># - development version</tt> </tt>
+<a name="L14"></a><tt class="py-lineno"> 14</tt>  <tt class="py-line"><tt class="py-comment">#</tt> </tt>
+<a name="L15"></a><tt class="py-lineno"> 15</tt>  <tt class="py-line"><tt class="py-comment"># v0.31:</tt> </tt>
+<a name="L16"></a><tt class="py-lineno"> 16</tt>  <tt class="py-line"><tt class="py-comment"># - added the Query class, simplified the command structure</tt> </tt>
+<a name="L17"></a><tt class="py-lineno"> 17</tt>  <tt class="py-line"><tt class="py-comment">#</tt> </tt>
+<a name="L18"></a><tt class="py-lineno"> 18</tt>  <tt class="py-line"><tt class="py-comment"># TODO List :</tt> </tt>
+<a name="L19"></a><tt class="py-lineno"> 19</tt>  <tt class="py-line"><tt class="py-comment"># - make sure that we figure out the method for closing the connection, else we get connections</tt> </tt>
+<a name="L20"></a><tt class="py-lineno"> 20</tt>  <tt class="py-line"><tt class="py-comment">#   open all over the place</tt> </tt>
+<a name="L21"></a><tt class="py-lineno"> 21</tt>  <tt class="py-line"><tt class="py-comment"># - think about a return function that detects empty on the fly and returns a consistent type (ie always a tuple, not a tuple with one tuple)</tt> </tt>
+<a name="L22"></a><tt class="py-lineno"> 22</tt>  <tt class="py-line"><tt class="py-comment"># ----------------------------------------------------------------------------</tt> </tt>
+<a name="L23"></a><tt class="py-lineno"> 23</tt>  <tt class="py-line"><tt class="py-docstring">''' classes for MySQL database queries'''</tt> </tt>
+<a name="L24"></a><tt class="py-lineno"> 24</tt>  <tt class="py-line"><tt class="py-keyword">try</tt><tt class="py-op">:</tt> </tt>
+<a name="L25"></a><tt class="py-lineno"> 25</tt>  <tt class="py-line">    <tt class="py-keyword">import</tt> <tt class="py-name">MySQLdb</tt> <tt class="py-keyword">as</tt> <tt id="link-0" class="py-name" targets="Module assetmanager.lib.sql=assetmanager.lib.sql-module.html"><a title="assetmanager.lib.sql" class="py-name" href="#" onclick="return doclink('link-0', 'sql', 'link-0');">sql</a></tt> </tt>
+<a name="L26"></a><tt class="py-lineno"> 26</tt>  <tt class="py-line"><tt class="py-keyword">except</tt><tt class="py-op">:</tt> </tt>
+<a name="L27"></a><tt class="py-lineno"> 27</tt>  <tt class="py-line">    <tt class="py-keyword">pass</tt> </tt>
+<a name="L28"></a><tt class="py-lineno"> 28</tt>  <tt class="py-line"><tt class="py-keyword">from</tt> <tt class="py-name">re</tt> <tt class="py-keyword">import</tt>  <tt class="py-name">sub</tt> </tt>
+<a name="L29"></a><tt class="py-lineno"> 29</tt>  <tt class="py-line"><tt class="py-keyword">from</tt> <tt class="py-name">assetmanager</tt><tt class="py-op">.</tt><tt class="py-name">lib</tt><tt class="py-op">.</tt><tt id="link-1" class="py-name" targets="Module assetmanager.lib.system=assetmanager.lib.system-module.html"><a title="assetmanager.lib.system" class="py-name" href="#" onclick="return doclink('link-1', 'system', 'link-1');">system</a></tt> <tt class="py-keyword">import</tt> <tt id="link-2" class="py-name" targets="Class assetmanager.lib.system.Output=assetmanager.lib.system.Output-class.html"><a title="assetmanager.lib.system.Output" class="py-name" href="#" onclick="return doclink('link-2', 'Output', 'link-2');">Output</a></tt> </tt>
+<a name="L30"></a><tt class="py-lineno"> 30</tt>  <tt class="py-line"> </tt>
+<a name="L31"></a><tt class="py-lineno"> 31</tt>  <tt class="py-line"><tt id="link-3" class="py-name" targets="Variable assetmanager.lib.assets.__amlib__=assetmanager.lib.assets-module.html#__amlib__,Variable assetmanager.lib.io.__amlib__=assetmanager.lib.io-module.html#__amlib__,Variable assetmanager.lib.shows.__amlib__=assetmanager.lib.shows-module.html#__amlib__,Variable assetmanager.lib.sql.__amlib__=assetmanager.lib.sql-module.html#__amlib__,Variable assetmanager.lib.system.__amlib__=assetmanager.lib.system-module.html#__amlib__,Variable assetmanager.lib.users.__amlib__=assetmanager.lib.users-module.html#__amlib__"><a title="assetmanager.lib.assets.__amlib__
+assetmanager.lib.io.__amlib__
+assetmanager.lib.shows.__amlib__
+assetmanager.lib.sql.__amlib__
+assetmanager.lib.system.__amlib__
+assetmanager.lib.users.__amlib__" class="py-name" href="#" onclick="return doclink('link-3', '__amlib__', 'link-3');">__amlib__</a></tt> <tt class="py-op">=</tt> <tt class="py-string">'sql'</tt> </tt>
+<a name="L32"></a><tt class="py-lineno"> 32</tt>  <tt class="py-line"><tt class="py-name">__version__</tt> <tt class="py-op">=</tt> <tt class="py-string">'0.32'</tt> </tt>
+<a name="L33"></a><tt class="py-lineno"> 33</tt>  <tt class="py-line"><tt id="link-4" class="py-name" targets="Variable assetmanager.lib.assets.__lastupdate__=assetmanager.lib.assets-module.html#__lastupdate__,Variable assetmanager.lib.io.__lastupdate__=assetmanager.lib.io-module.html#__lastupdate__,Variable assetmanager.lib.shows.__lastupdate__=assetmanager.lib.shows-module.html#__lastupdate__,Variable assetmanager.lib.sql.__lastupdate__=assetmanager.lib.sql-module.html#__lastupdate__,Variable assetmanager.lib.system.__lastupdate__=assetmanager.lib.system-module.html#__lastupdate__,Variable assetmanager.lib.users.__lastupdate__=assetmanager.lib.users-module.html#__lastupdate__"><a title="assetmanager.lib.assets.__lastupdate__
+assetmanager.lib.io.__lastupdate__
+assetmanager.lib.shows.__lastupdate__
+assetmanager.lib.sql.__lastupdate__
+assetmanager.lib.system.__lastupdate__
+assetmanager.lib.users.__lastupdate__" class="py-name" href="#" onclick="return doclink('link-4', '__lastupdate__', 'link-4');">__lastupdate__</a></tt> <tt class="py-op">=</tt> <tt class="py-string">'Dec 09 2011'</tt> </tt>
+<a name="L34"></a><tt class="py-lineno"> 34</tt>  <tt class="py-line"><tt id="link-5" class="py-name" targets="Variable assetmanager.lib.assets.__status__=assetmanager.lib.assets-module.html#__status__,Variable assetmanager.lib.io.__status__=assetmanager.lib.io-module.html#__status__,Variable assetmanager.lib.shows.__status__=assetmanager.lib.shows-module.html#__status__,Variable assetmanager.lib.sql.__status__=assetmanager.lib.sql-module.html#__status__,Variable assetmanager.lib.system.__status__=assetmanager.lib.system-module.html#__status__,Variable assetmanager.lib.users.__status__=assetmanager.lib.users-module.html#__status__"><a title="assetmanager.lib.assets.__status__
+assetmanager.lib.io.__status__
+assetmanager.lib.shows.__status__
+assetmanager.lib.sql.__status__
+assetmanager.lib.system.__status__
+assetmanager.lib.users.__status__" class="py-name" href="#" onclick="return doclink('link-5', '__status__', 'link-5');">__status__</a></tt> <tt class="py-op">=</tt> <tt class="py-string">'development'</tt> </tt>
+<a name="L35"></a><tt class="py-lineno"> 35</tt>  <tt class="py-line"> </tt>
+<a name="L36"></a><tt class="py-lineno"> 36</tt>  <tt class="py-line"><tt class="py-keyword">import</tt> <tt class="py-name">__builtin__</tt> </tt>
+<a name="L37"></a><tt class="py-lineno"> 37</tt>  <tt class="py-line"><tt class="py-keyword">try</tt><tt class="py-op">:</tt>     </tt>
+<a name="L38"></a><tt class="py-lineno"> 38</tt>  <tt class="py-line">    <tt class="py-name">__builtin__</tt><tt class="py-op">.</tt><tt class="py-name">am_mods</tt><tt class="py-op">.</tt><tt id="link-6" class="py-name" targets="Method assetmanager.lib.system.UserPrefs.append()=assetmanager.lib.system.UserPrefs-class.html#append"><a title="assetmanager.lib.system.UserPrefs.append" class="py-name" href="#" onclick="return doclink('link-6', 'append', 'link-6');">append</a></tt><tt class="py-op">(</tt><tt class="py-name">__name__</tt> <tt class="py-op">+</tt> <tt class="py-string">' - ('</tt> <tt class="py-op">+</tt> <tt id="link-7" class="py-name"><a title="assetmanager.lib.assets.__status__
+assetmanager.lib.io.__status__
+assetmanager.lib.shows.__status__
+assetmanager.lib.sql.__status__
+assetmanager.lib.system.__status__
+assetmanager.lib.users.__status__" class="py-name" href="#" onclick="return doclink('link-7', '__status__', 'link-5');">__status__</a></tt> <tt class="py-op">+</tt> <tt class="py-string">'  v'</tt> <tt class="py-op">+</tt> <tt class="py-name">__version__</tt> <tt class="py-op">+</tt> <tt class="py-string">') - '</tt><tt class="py-op">+</tt> <tt id="link-8" class="py-name"><a title="assetmanager.lib.assets.__lastupdate__
+assetmanager.lib.io.__lastupdate__
+assetmanager.lib.shows.__lastupdate__
+assetmanager.lib.sql.__lastupdate__
+assetmanager.lib.system.__lastupdate__
+assetmanager.lib.users.__lastupdate__" class="py-name" href="#" onclick="return doclink('link-8', '__lastupdate__', 'link-4');">__lastupdate__</a></tt> <tt class="py-op">+</tt><tt class="py-string">'\n'</tt> <tt class="py-op">+</tt> <tt class="py-name">__file__</tt> <tt class="py-op">+</tt> <tt class="py-string">'\n\n'</tt> <tt class="py-op">)</tt> </tt>
+<a name="L39"></a><tt class="py-lineno"> 39</tt>  <tt class="py-line"><tt class="py-keyword">except</tt><tt class="py-op">:</tt> </tt>
+<a name="L40"></a><tt class="py-lineno"> 40</tt>  <tt class="py-line">    <tt class="py-keyword">pass</tt> </tt>
+<a name="L41"></a><tt class="py-lineno"> 41</tt>  <tt class="py-line"> </tt>
+<a name="L42"></a><tt class="py-lineno"> 42</tt>  <tt class="py-line"> </tt>
+<a name="Query"></a><div id="Query-def"><a name="L43"></a><tt class="py-lineno"> 43</tt> <a class="py-toggle" href="#" id="Query-toggle" onclick="return toggle('Query');">-</a><tt class="py-line"><tt class="py-keyword">class</tt> <a class="py-def-name" href="assetmanager.lib.sql.Query-class.html">Query</a><tt class="py-op">(</tt><tt class="py-base-class">object</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="Query-collapsed" style="display:none;" pad="+++" indent="++++"></div><div id="Query-expanded"><a name="L44"></a><tt class="py-lineno"> 44</tt>  <tt class="py-line">    <tt class="py-docstring">'''</tt> </tt>
+<a name="L45"></a><tt class="py-lineno"> 45</tt>  <tt class="py-line"><tt class="py-docstring">    Class: Query()</tt> </tt>
+<a name="L46"></a><tt class="py-lineno"> 46</tt>  <tt class="py-line"><tt class="py-docstring">    </tt> </tt>
+<a name="L47"></a><tt class="py-lineno"> 47</tt>  <tt class="py-line"><tt class="py-docstring">    DESCRIPTION</tt> </tt>
+<a name="L48"></a><tt class="py-lineno"> 48</tt>  <tt class="py-line"><tt class="py-docstring">        This is a simple wrapper class for the MySQLdb connection, mostly providing error handling</tt> </tt>
+<a name="L49"></a><tt class="py-lineno"> 49</tt>  <tt class="py-line"><tt class="py-docstring">        and output functions, with extra functionality for returning column names for each value</tt> </tt>
+<a name="L50"></a><tt class="py-lineno"> 50</tt>  <tt class="py-line"><tt class="py-docstring">        returned.</tt> </tt>
+<a name="L51"></a><tt class="py-lineno"> 51</tt>  <tt class="py-line"><tt class="py-docstring">        </tt> </tt>
+<a name="L52"></a><tt class="py-lineno"> 52</tt>  <tt class="py-line"><tt class="py-docstring">    USAGE</tt> </tt>
+<a name="L53"></a><tt class="py-lineno"> 53</tt>  <tt class="py-line"><tt class="py-docstring">        Simply call the class and pass it a SQL statement. Passsing the table in as a string after</tt> </tt>
+<a name="L54"></a><tt class="py-lineno"> 54</tt>  <tt class="py-line"><tt class="py-docstring">        the query string will return a tuple of column names</tt> </tt>
+<a name="L55"></a><tt class="py-lineno"> 55</tt>  <tt class="py-line"><tt class="py-docstring">    </tt> </tt>
+<a name="L56"></a><tt class="py-lineno"> 56</tt>  <tt class="py-line"><tt class="py-docstring">    '''</tt> </tt>
+<a name="Query.__init__"></a><div id="Query.__init__-def"><a name="L57"></a><tt class="py-lineno"> 57</tt> <a class="py-toggle" href="#" id="Query.__init__-toggle" onclick="return toggle('Query.__init__');">-</a><tt class="py-line">    <tt class="py-keyword">def</tt> <a class="py-def-name" href="assetmanager.lib.sql.Query-class.html#__init__">__init__</a><tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">,</tt>  <tt class="py-param">query</tt><tt class="py-op">=</tt><tt class="py-string">''</tt><tt class="py-op">,</tt> <tt class="py-param">table</tt><tt class="py-op">=</tt><tt class="py-string">''</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="Query.__init__-collapsed" style="display:none;" pad="+++" indent="++++++++"></div><div id="Query.__init__-expanded"><a name="L58"></a><tt class="py-lineno"> 58</tt>  <tt class="py-line">        <tt class="py-name">outmsg</tt> <tt class="py-op">=</tt> <tt id="link-9" class="py-name"><a title="assetmanager.lib.system.Output" class="py-name" href="#" onclick="return doclink('link-9', 'Output', 'link-2');">Output</a></tt><tt class="py-op">(</tt><tt class="py-string">'opening connection to database...'</tt><tt class="py-op">,</tt> <tt class="py-name">sev</tt><tt class="py-op">=</tt><tt class="py-string">'db'</tt><tt class="py-op">)</tt> </tt>
+<a name="L59"></a><tt class="py-lineno"> 59</tt>  <tt class="py-line">        <tt class="py-name">db</tt> <tt class="py-op">=</tt> <tt class="py-string">''</tt> </tt>
+<a name="L60"></a><tt class="py-lineno"> 60</tt>  <tt class="py-line">        <tt class="py-name">cursor</tt> <tt class="py-op">=</tt> <tt class="py-string">''</tt> </tt>
+<a name="L61"></a><tt class="py-lineno"> 61</tt>  <tt class="py-line">        <tt class="py-comment"># open a connection to the database</tt> </tt>
+<a name="L62"></a><tt class="py-lineno"> 62</tt>  <tt class="py-line">        <tt class="py-keyword">try</tt><tt class="py-op">:</tt> </tt>
+<a name="L63"></a><tt class="py-lineno"> 63</tt>  <tt class="py-line">            <tt class="py-name">db</tt> <tt class="py-op">=</tt> <tt id="link-10" class="py-name"><a title="assetmanager.lib.sql" class="py-name" href="#" onclick="return doclink('link-10', 'sql', 'link-0');">sql</a></tt><tt class="py-op">.</tt><tt class="py-name">connect</tt><tt class="py-op">(</tt><tt class="py-name">host</tt><tt class="py-op">=</tt><tt class="py-string">'localhost'</tt><tt class="py-op">,</tt> <tt id="link-11" class="py-name" targets="Variable assetmanager.lib.system.user=assetmanager.lib.system-module.html#user"><a title="assetmanager.lib.system.user" class="py-name" href="#" onclick="return doclink('link-11', 'user', 'link-11');">user</a></tt><tt class="py-op">=</tt><tt class="py-string">'root'</tt><tt class="py-op">,</tt> <tt class="py-name">db</tt><tt class="py-op">=</tt><tt class="py-string">"assets"</tt><tt class="py-op">)</tt> </tt>
+<a name="L64"></a><tt class="py-lineno"> 64</tt>  <tt class="py-line">            <tt class="py-name">cursor</tt> <tt class="py-op">=</tt> <tt class="py-name">db</tt><tt class="py-op">.</tt><tt class="py-name">cursor</tt><tt class="py-op">(</tt><tt class="py-op">)</tt> </tt>
+<a name="L65"></a><tt class="py-lineno"> 65</tt>  <tt class="py-line">            <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">connected</tt> <tt class="py-op">=</tt> <tt class="py-name">True</tt> </tt>
+<a name="L66"></a><tt class="py-lineno"> 66</tt>  <tt class="py-line">             </tt>
+<a name="L67"></a><tt class="py-lineno"> 67</tt>  <tt class="py-line">            <tt class="py-comment"># return the columns if a table is called</tt> </tt>
+<a name="L68"></a><tt class="py-lineno"> 68</tt>  <tt class="py-line">            <tt class="py-keyword">if</tt> <tt class="py-name">table</tt><tt class="py-op">:</tt> </tt>
+<a name="L69"></a><tt class="py-lineno"> 69</tt>  <tt class="py-line">                <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">allColumns</tt> <tt class="py-op">=</tt> <tt class="py-name">self</tt><tt class="py-op">.</tt><tt id="link-12" class="py-name" targets="Method assetmanager.lib.sql.Query.returnAllColumns()=assetmanager.lib.sql.Query-class.html#returnAllColumns"><a title="assetmanager.lib.sql.Query.returnAllColumns" class="py-name" href="#" onclick="return doclink('link-12', 'returnAllColumns', 'link-12');">returnAllColumns</a></tt><tt class="py-op">(</tt><tt class="py-name">table</tt><tt class="py-op">)</tt> </tt>
+<a name="L70"></a><tt class="py-lineno"> 70</tt>  <tt class="py-line">                <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">table</tt> <tt class="py-op">=</tt> <tt class="py-name">table</tt> </tt>
+<a name="L71"></a><tt class="py-lineno"> 71</tt>  <tt class="py-line">             </tt>
+<a name="L72"></a><tt class="py-lineno"> 72</tt>  <tt class="py-line">            <tt id="link-13" class="py-name"><a title="assetmanager.lib.system.Output" class="py-name" href="#" onclick="return doclink('link-13', 'Output', 'link-2');">Output</a></tt><tt class="py-op">(</tt><tt class="py-name">msg</tt> <tt class="py-op">=</tt> <tt class="py-string">'Successfully connected to the database'</tt><tt class="py-op">,</tt> <tt class="py-name">sev</tt> <tt class="py-op">=</tt> <tt class="py-string">'db'</tt><tt class="py-op">)</tt> </tt>
+<a name="L73"></a><tt class="py-lineno"> 73</tt>  <tt class="py-line">        <tt class="py-keyword">except</tt><tt class="py-op">:</tt> </tt>
+<a name="L74"></a><tt class="py-lineno"> 74</tt>  <tt class="py-line">            <tt class="py-comment"># if we can't connect, write out an error to the logs</tt> </tt>
+<a name="L75"></a><tt class="py-lineno"> 75</tt>  <tt class="py-line">            <tt id="link-14" class="py-name"><a title="assetmanager.lib.system.Output" class="py-name" href="#" onclick="return doclink('link-14', 'Output', 'link-2');">Output</a></tt><tt class="py-op">(</tt><tt class="py-name">sev</tt><tt class="py-op">=</tt><tt class="py-string">'err'</tt><tt class="py-op">,</tt> <tt class="py-name">msg</tt> <tt class="py-op">=</tt> <tt class="py-string">'Could not connect to the database'</tt><tt class="py-op">,</tt> <tt class="py-name">write</tt><tt class="py-op">=</tt><tt class="py-name">True</tt><tt class="py-op">)</tt> </tt>
+<a name="L76"></a><tt class="py-lineno"> 76</tt>  <tt class="py-line">            <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">connected</tt> <tt class="py-op">=</tt> <tt class="py-name">False</tt> </tt>
+<a name="L77"></a><tt class="py-lineno"> 77</tt>  <tt class="py-line">             </tt>
+<a name="L78"></a><tt class="py-lineno"> 78</tt>  <tt class="py-line">        <tt class="py-keyword">if</tt> <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">connected</tt><tt class="py-op">:</tt> </tt>
+<a name="L79"></a><tt class="py-lineno"> 79</tt>  <tt class="py-line">            <tt class="py-keyword">if</tt> <tt id="link-15" class="py-name" targets="Method assetmanager.lib.assets.AssetBase.query()=assetmanager.lib.assets.AssetBase-class.html#query"><a title="assetmanager.lib.assets.AssetBase.query" class="py-name" href="#" onclick="return doclink('link-15', 'query', 'link-15');">query</a></tt><tt class="py-op">:</tt> </tt>
+<a name="L80"></a><tt class="py-lineno"> 80</tt>  <tt class="py-line">                <tt id="link-16" class="py-name"><a title="assetmanager.lib.system.Output" class="py-name" href="#" onclick="return doclink('link-16', 'Output', 'link-2');">Output</a></tt><tt class="py-op">(</tt><tt class="py-name">msg</tt> <tt class="py-op">=</tt> <tt class="py-op">(</tt><tt class="py-string">'Query: %s'</tt> <tt class="py-op">%</tt> <tt id="link-17" class="py-name"><a title="assetmanager.lib.assets.AssetBase.query" class="py-name" href="#" onclick="return doclink('link-17', 'query', 'link-15');">query</a></tt><tt class="py-op">)</tt><tt class="py-op">,</tt> <tt class="py-name">sev</tt> <tt class="py-op">=</tt> <tt class="py-string">'db'</tt><tt class="py-op">)</tt> </tt>
+<a name="L81"></a><tt class="py-lineno"> 81</tt>  <tt class="py-line">                <tt class="py-keyword">try</tt><tt class="py-op">:</tt> </tt>
+<a name="L82"></a><tt class="py-lineno"> 82</tt>  <tt class="py-line">                    <tt id="link-18" class="py-name"><a title="assetmanager.lib.system.Output" class="py-name" href="#" onclick="return doclink('link-18', 'Output', 'link-2');">Output</a></tt><tt class="py-op">(</tt><tt class="py-name">msg</tt> <tt class="py-op">=</tt> <tt class="py-string">'querying the database'</tt><tt class="py-op">,</tt> <tt class="py-name">sev</tt><tt class="py-op">=</tt><tt class="py-string">'db'</tt><tt class="py-op">)</tt> </tt>
+<a name="L83"></a><tt class="py-lineno"> 83</tt>  <tt class="py-line">                    <tt class="py-name">cursor</tt><tt class="py-op">.</tt><tt class="py-name">execute</tt><tt class="py-op">(</tt><tt id="link-19" class="py-name"><a title="assetmanager.lib.assets.AssetBase.query" class="py-name" href="#" onclick="return doclink('link-19', 'query', 'link-15');">query</a></tt><tt class="py-op">)</tt> </tt>
+<a name="L84"></a><tt class="py-lineno"> 84</tt>  <tt class="py-line">                    <tt class="py-name">result</tt> <tt class="py-op">=</tt> <tt class="py-name">cursor</tt><tt class="py-op">.</tt><tt class="py-name">fetchall</tt><tt class="py-op">(</tt><tt class="py-op">)</tt> </tt>
+<a name="L85"></a><tt class="py-lineno"> 85</tt>  <tt class="py-line">                    <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">result_dirty</tt> <tt class="py-op">=</tt> <tt class="py-name">result</tt> </tt>
+<a name="L86"></a><tt class="py-lineno"> 86</tt>  <tt class="py-line">                    <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">result</tt> <tt class="py-op">=</tt> <tt class="py-name">self</tt><tt class="py-op">.</tt><tt id="link-20" class="py-name" targets="Method assetmanager.lib.sql.Query.filterResult()=assetmanager.lib.sql.Query-class.html#filterResult"><a title="assetmanager.lib.sql.Query.filterResult" class="py-name" href="#" onclick="return doclink('link-20', 'filterResult', 'link-20');">filterResult</a></tt><tt class="py-op">(</tt><tt class="py-name">result</tt><tt class="py-op">)</tt> </tt>
+<a name="L87"></a><tt class="py-lineno"> 87</tt>  <tt class="py-line">                <tt class="py-comment"># unless there's an error in the SQL query...format it and pass it to the user</tt> </tt>
+<a name="L88"></a><tt class="py-lineno"> 88</tt>  <tt class="py-line">                <tt class="py-keyword">except</tt> <tt class="py-name">Exception</tt><tt class="py-op">,</tt> <tt class="py-name">err</tt><tt class="py-op">:</tt> </tt>
+<a name="L89"></a><tt class="py-lineno"> 89</tt>  <tt class="py-line">                    <tt class="py-name">err2</tt> <tt class="py-op">=</tt> <tt class="py-name">str</tt><tt class="py-op">(</tt><tt class="py-name">err</tt><tt class="py-op">)</tt><tt class="py-op">.</tt><tt class="py-name">lstrip</tt><tt class="py-op">(</tt><tt class="py-string">'"('</tt><tt class="py-op">)</tt> </tt>
+<a name="L90"></a><tt class="py-lineno"> 90</tt>  <tt class="py-line">                    <tt class="py-name">err2</tt> <tt class="py-op">=</tt> <tt class="py-name">err2</tt><tt class="py-op">.</tt><tt class="py-name">rstrip</tt><tt class="py-op">(</tt><tt class="py-string">')"'</tt><tt class="py-op">)</tt> </tt>
+<a name="L91"></a><tt class="py-lineno"> 91</tt>  <tt class="py-line">                    <tt class="py-name">outmsg</tt> <tt class="py-op">=</tt> <tt id="link-21" class="py-name"><a title="assetmanager.lib.system.Output" class="py-name" href="#" onclick="return doclink('link-21', 'Output', 'link-2');">Output</a></tt><tt class="py-op">(</tt><tt class="py-string">'%s'</tt> <tt class="py-op">%</tt> <tt class="py-name">str</tt><tt class="py-op">(</tt><tt class="py-name">err2</tt><tt class="py-op">)</tt><tt class="py-op">,</tt> <tt class="py-name">sev</tt><tt class="py-op">=</tt><tt class="py-string">'sqlerr'</tt><tt class="py-op">)</tt> </tt>
+<a name="L92"></a><tt class="py-lineno"> 92</tt>  <tt class="py-line">            <tt class="py-keyword">else</tt><tt class="py-op">:</tt> </tt>
+<a name="L93"></a><tt class="py-lineno"> 93</tt>  <tt class="py-line">                <tt class="py-name">outmsg</tt> <tt class="py-op">=</tt> <tt id="link-22" class="py-name"><a title="assetmanager.lib.system.Output" class="py-name" href="#" onclick="return doclink('link-22', 'Output', 'link-2');">Output</a></tt><tt class="py-op">(</tt><tt class="py-name">msg</tt> <tt class="py-op">=</tt> <tt class="py-string">'please enter a query'</tt><tt class="py-op">)</tt> </tt>
+</div><a name="L94"></a><tt class="py-lineno"> 94</tt>  <tt class="py-line">     </tt>
+<a name="Query.close"></a><div id="Query.close-def"><a name="L95"></a><tt class="py-lineno"> 95</tt> <a class="py-toggle" href="#" id="Query.close-toggle" onclick="return toggle('Query.close');">-</a><tt class="py-line">    <tt class="py-keyword">def</tt> <a class="py-def-name" href="assetmanager.lib.sql.Query-class.html#close">close</a><tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">,</tt> <tt class="py-param">cursor</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="Query.close-collapsed" style="display:none;" pad="+++" indent="++++++++"></div><div id="Query.close-expanded"><a name="L96"></a><tt class="py-lineno"> 96</tt>  <tt class="py-line">        <tt class="py-docstring">""" closes the connection (if open)"""</tt> </tt>
+<a name="L97"></a><tt class="py-lineno"> 97</tt>  <tt class="py-line">        <tt class="py-keyword">if</tt> <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">cursor</tt><tt class="py-op">.</tt><tt class="py-name">connection</tt><tt class="py-op">(</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+<a name="L98"></a><tt class="py-lineno"> 98</tt>  <tt class="py-line">            <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">connected</tt> <tt class="py-op">=</tt> <tt class="py-name">False</tt> </tt>
+<a name="L99"></a><tt class="py-lineno"> 99</tt>  <tt class="py-line">            <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">cursor</tt><tt class="py-op">.</tt><tt id="link-23" class="py-name" targets="Method assetmanager.lib.sql.Query.close()=assetmanager.lib.sql.Query-class.html#close"><a title="assetmanager.lib.sql.Query.close" class="py-name" href="#" onclick="return doclink('link-23', 'close', 'link-23');">close</a></tt><tt class="py-op">(</tt><tt class="py-op">)</tt> </tt>
+</div><a name="L100"></a><tt class="py-lineno">100</tt>  <tt class="py-line">             </tt>
+<a name="L101"></a><tt class="py-lineno">101</tt>  <tt class="py-line">         </tt>
+<a name="L102"></a><tt class="py-lineno">102</tt>  <tt class="py-line"> </tt>
+<a name="L103"></a><tt class="py-lineno">103</tt>  <tt class="py-line">     </tt>
+<a name="Query.returnAllColumns"></a><div id="Query.returnAllColumns-def"><a name="L104"></a><tt class="py-lineno">104</tt> <a class="py-toggle" href="#" id="Query.returnAllColumns-toggle" onclick="return toggle('Query.returnAllColumns');">-</a><tt class="py-line">    <tt class="py-keyword">def</tt> <a class="py-def-name" href="assetmanager.lib.sql.Query-class.html#returnAllColumns">returnAllColumns</a><tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">,</tt> <tt class="py-param">table</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="Query.returnAllColumns-collapsed" style="display:none;" pad="+++" indent="++++++++"></div><div id="Query.returnAllColumns-expanded"><a name="L105"></a><tt class="py-lineno">105</tt>  <tt class="py-line">        <tt class="py-docstring">""" returns a list of the columNames from the given table"""</tt> </tt>
+<a name="L106"></a><tt class="py-lineno">106</tt>  <tt class="py-line">        <tt class="py-comment"># TODO: figure out a way to define the cursor globally so that we don't have to keep opening it</tt> </tt>
+<a name="L107"></a><tt class="py-lineno">107</tt>  <tt class="py-line">        <tt class="py-name">cursor</tt> <tt class="py-op">=</tt> <tt class="py-string">''</tt> </tt>
+<a name="L108"></a><tt class="py-lineno">108</tt>  <tt class="py-line">        <tt class="py-name">db</tt> <tt class="py-op">=</tt> <tt class="py-string">''</tt> </tt>
+<a name="L109"></a><tt class="py-lineno">109</tt>  <tt class="py-line">        <tt class="py-keyword">try</tt><tt class="py-op">:</tt> </tt>
+<a name="L110"></a><tt class="py-lineno">110</tt>  <tt class="py-line">            <tt class="py-name">db</tt> <tt class="py-op">=</tt> <tt id="link-24" class="py-name"><a title="assetmanager.lib.sql" class="py-name" href="#" onclick="return doclink('link-24', 'sql', 'link-0');">sql</a></tt><tt class="py-op">.</tt><tt class="py-name">connect</tt><tt class="py-op">(</tt><tt class="py-name">host</tt><tt class="py-op">=</tt><tt class="py-string">'localhost'</tt><tt class="py-op">,</tt> <tt id="link-25" class="py-name"><a title="assetmanager.lib.system.user" class="py-name" href="#" onclick="return doclink('link-25', 'user', 'link-11');">user</a></tt><tt class="py-op">=</tt><tt class="py-string">'root'</tt><tt class="py-op">,</tt> <tt class="py-name">db</tt><tt class="py-op">=</tt><tt class="py-string">"assets"</tt><tt class="py-op">)</tt> </tt>
+<a name="L111"></a><tt class="py-lineno">111</tt>  <tt class="py-line">            <tt class="py-name">cursor</tt> <tt class="py-op">=</tt> <tt class="py-name">db</tt><tt class="py-op">.</tt><tt class="py-name">cursor</tt><tt class="py-op">(</tt><tt class="py-op">)</tt> </tt>
+<a name="L112"></a><tt class="py-lineno">112</tt>  <tt class="py-line">        <tt class="py-keyword">except</tt> <tt class="py-name">Exception</tt><tt class="py-op">,</tt> <tt class="py-name">err</tt><tt class="py-op">:</tt> </tt>
+<a name="L113"></a><tt class="py-lineno">113</tt>  <tt class="py-line">            <tt class="py-name">err2</tt> <tt class="py-op">=</tt> <tt class="py-name">str</tt><tt class="py-op">(</tt><tt class="py-name">err</tt><tt class="py-op">)</tt><tt class="py-op">.</tt><tt class="py-name">lstrip</tt><tt class="py-op">(</tt><tt class="py-string">'"('</tt><tt class="py-op">)</tt> </tt>
+<a name="L114"></a><tt class="py-lineno">114</tt>  <tt class="py-line">            <tt class="py-name">err2</tt> <tt class="py-op">=</tt> <tt class="py-name">err2</tt><tt class="py-op">.</tt><tt class="py-name">rstrip</tt><tt class="py-op">(</tt><tt class="py-string">')"'</tt><tt class="py-op">)</tt> </tt>
+<a name="L115"></a><tt class="py-lineno">115</tt>  <tt class="py-line">            <tt class="py-name">outmsg</tt> <tt class="py-op">=</tt> <tt id="link-26" class="py-name"><a title="assetmanager.lib.system.Output" class="py-name" href="#" onclick="return doclink('link-26', 'Output', 'link-2');">Output</a></tt><tt class="py-op">(</tt><tt class="py-string">'%s'</tt> <tt class="py-op">%</tt> <tt class="py-name">str</tt><tt class="py-op">(</tt><tt class="py-name">err2</tt><tt class="py-op">)</tt><tt class="py-op">,</tt> <tt class="py-name">sev</tt><tt class="py-op">=</tt><tt class="py-string">'sqlerr'</tt><tt class="py-op">)</tt> </tt>
+<a name="L116"></a><tt class="py-lineno">116</tt>  <tt class="py-line">             </tt>
+<a name="L117"></a><tt class="py-lineno">117</tt>  <tt class="py-line">        <tt class="py-name">msg</tt> <tt class="py-op">=</tt> <tt class="py-string">'show columns from %s'</tt> <tt class="py-op">%</tt> <tt class="py-name">table</tt> </tt>
+<a name="L118"></a><tt class="py-lineno">118</tt>  <tt class="py-line">        <tt id="link-27" class="py-name" targets="Variable assetmanager.lib.assets.out=assetmanager.lib.assets-module.html#out,Variable assetmanager.lib.users.out=assetmanager.lib.users-module.html#out"><a title="assetmanager.lib.assets.out
+assetmanager.lib.users.out" class="py-name" href="#" onclick="return doclink('link-27', 'out', 'link-27');">out</a></tt> <tt class="py-op">=</tt> <tt id="link-28" class="py-name"><a title="assetmanager.lib.system.Output" class="py-name" href="#" onclick="return doclink('link-28', 'Output', 'link-2');">Output</a></tt><tt class="py-op">(</tt><tt class="py-name">msg</tt><tt class="py-op">)</tt> </tt>
+<a name="L119"></a><tt class="py-lineno">119</tt>  <tt class="py-line">        <tt class="py-keyword">try</tt><tt class="py-op">:</tt> </tt>
+<a name="L120"></a><tt class="py-lineno">120</tt>  <tt class="py-line">            <tt class="py-name">cursor</tt><tt class="py-op">.</tt><tt class="py-name">execute</tt><tt class="py-op">(</tt><tt class="py-string">'show columns from %s'</tt><tt class="py-op">,</tt>  <tt class="py-name">table</tt><tt class="py-op">)</tt> </tt>
+<a name="L121"></a><tt class="py-lineno">121</tt>  <tt class="py-line">            <tt class="py-name">colNames</tt> <tt class="py-op">=</tt> <tt class="py-name">cursor</tt><tt class="py-op">.</tt><tt class="py-name">fetchall</tt><tt class="py-op">(</tt><tt class="py-op">)</tt> </tt>
+<a name="L122"></a><tt class="py-lineno">122</tt>  <tt class="py-line">            <tt class="py-name">desc</tt> <tt class="py-op">=</tt> <tt class="py-op">[</tt><tt class="py-name">col</tt><tt class="py-op">[</tt><tt class="py-number">0</tt><tt class="py-op">]</tt> <tt class="py-keyword">for</tt> <tt class="py-name">col</tt> <tt class="py-keyword">in</tt> <tt class="py-name">colNames</tt><tt class="py-op">]</tt> </tt>
+<a name="L123"></a><tt class="py-lineno">123</tt>  <tt class="py-line">            <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">allColumns</tt> <tt class="py-op">=</tt> <tt class="py-name">desc</tt> </tt>
+<a name="L124"></a><tt class="py-lineno">124</tt>  <tt class="py-line">        <tt class="py-keyword">except</tt> <tt class="py-name">Exception</tt><tt class="py-op">,</tt> <tt class="py-name">err</tt><tt class="py-op">:</tt> </tt>
+<a name="L125"></a><tt class="py-lineno">125</tt>  <tt class="py-line">            <tt class="py-name">err2</tt> <tt class="py-op">=</tt> <tt class="py-name">str</tt><tt class="py-op">(</tt><tt class="py-name">err</tt><tt class="py-op">)</tt><tt class="py-op">.</tt><tt class="py-name">lstrip</tt><tt class="py-op">(</tt><tt class="py-string">'"('</tt><tt class="py-op">)</tt> </tt>
+<a name="L126"></a><tt class="py-lineno">126</tt>  <tt class="py-line">            <tt class="py-name">err2</tt> <tt class="py-op">=</tt> <tt class="py-name">err2</tt><tt class="py-op">.</tt><tt class="py-name">rstrip</tt><tt class="py-op">(</tt><tt class="py-string">')"'</tt><tt class="py-op">)</tt> </tt>
+<a name="L127"></a><tt class="py-lineno">127</tt>  <tt class="py-line">            <tt class="py-name">outmsg</tt> <tt class="py-op">=</tt> <tt id="link-29" class="py-name"><a title="assetmanager.lib.system.Output" class="py-name" href="#" onclick="return doclink('link-29', 'Output', 'link-2');">Output</a></tt><tt class="py-op">(</tt><tt class="py-string">'%s'</tt> <tt class="py-op">%</tt> <tt class="py-name">str</tt><tt class="py-op">(</tt><tt class="py-name">err2</tt><tt class="py-op">)</tt><tt class="py-op">,</tt> <tt class="py-name">sev</tt><tt class="py-op">=</tt><tt class="py-string">'sqlerr'</tt><tt class="py-op">)</tt> </tt>
+</div><a name="L128"></a><tt class="py-lineno">128</tt>  <tt class="py-line"> </tt>
+<a name="Query.filterResult"></a><div id="Query.filterResult-def"><a name="L129"></a><tt class="py-lineno">129</tt> <a class="py-toggle" href="#" id="Query.filterResult-toggle" onclick="return toggle('Query.filterResult');">-</a><tt class="py-line">    <tt class="py-keyword">def</tt> <a class="py-def-name" href="assetmanager.lib.sql.Query-class.html#filterResult">filterResult</a><tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">,</tt> <tt class="py-param">indata</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="Query.filterResult-collapsed" style="display:none;" pad="+++" indent="++++++++"></div><div id="Query.filterResult-expanded"><a name="L130"></a><tt class="py-lineno">130</tt>  <tt class="py-line">        <tt class="py-docstring">""" filters the sql result into a nice tuple without any empty items"""</tt> </tt>
+<a name="L131"></a><tt class="py-lineno">131</tt>  <tt class="py-line">        <tt class="py-name">outdata</tt> <tt class="py-op">=</tt> <tt class="py-op">[</tt><tt class="py-op">]</tt> </tt>
+<a name="L132"></a><tt class="py-lineno">132</tt>  <tt class="py-line">        <tt class="py-keyword">if</tt> <tt class="py-name">len</tt><tt class="py-op">(</tt><tt class="py-name">indata</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+<a name="L133"></a><tt class="py-lineno">133</tt>  <tt class="py-line">            <tt class="py-comment">#print 'indata size: %d' % len(indata)</tt> </tt>
+<a name="L134"></a><tt class="py-lineno">134</tt>  <tt class="py-line">            <tt class="py-keyword">for</tt> <tt class="py-name">data</tt> <tt class="py-keyword">in</tt> <tt class="py-name">indata</tt><tt class="py-op">:</tt> </tt>
+<a name="L135"></a><tt class="py-lineno">135</tt>  <tt class="py-line">                <tt class="py-comment">#print  data </tt> </tt>
+<a name="L136"></a><tt class="py-lineno">136</tt>  <tt class="py-line">                <tt class="py-keyword">if</tt> <tt class="py-name">type</tt><tt class="py-op">(</tt><tt class="py-name">data</tt><tt class="py-op">)</tt> <tt class="py-keyword">is</tt> <tt class="py-name">list</tt> <tt class="py-keyword">or</tt> <tt class="py-name">tuple</tt><tt class="py-op">:</tt> </tt>
+<a name="L137"></a><tt class="py-lineno">137</tt>  <tt class="py-line">                    <tt class="py-keyword">if</tt> <tt class="py-name">len</tt><tt class="py-op">(</tt><tt class="py-name">data</tt><tt class="py-op">)</tt> <tt class="py-keyword">is</tt> <tt class="py-number">1</tt><tt class="py-op">:</tt> </tt>
+<a name="L138"></a><tt class="py-lineno">138</tt>  <tt class="py-line">                         <tt class="py-comment"># we have a list or tuple with only one object</tt> </tt>
+<a name="L139"></a><tt class="py-lineno">139</tt>  <tt class="py-line">                        <tt class="py-keyword">for</tt> <tt class="py-name">each</tt> <tt class="py-keyword">in</tt> <tt class="py-name">data</tt><tt class="py-op">:</tt> </tt>
+<a name="L140"></a><tt class="py-lineno">140</tt>  <tt class="py-line">                            <tt class="py-comment">#print 'appending data from tuple: %s' % each</tt> </tt>
+<a name="L141"></a><tt class="py-lineno">141</tt>  <tt class="py-line">                            <tt class="py-name">outdata</tt><tt class="py-op">.</tt><tt id="link-30" class="py-name"><a title="assetmanager.lib.system.UserPrefs.append" class="py-name" href="#" onclick="return doclink('link-30', 'append', 'link-6');">append</a></tt><tt class="py-op">(</tt><tt class="py-name">each</tt><tt class="py-op">)</tt> </tt>
+<a name="L142"></a><tt class="py-lineno">142</tt>  <tt class="py-line">                    <tt class="py-keyword">else</tt><tt class="py-op">:</tt> </tt>
+<a name="L143"></a><tt class="py-lineno">143</tt>  <tt class="py-line">                        <tt class="py-comment">#print 'returning original data'</tt> </tt>
+<a name="L144"></a><tt class="py-lineno">144</tt>  <tt class="py-line">                        <tt class="py-comment"># return data # this was returning just a tuple of the first result</tt> </tt>
+<a name="L145"></a><tt class="py-lineno">145</tt>  <tt class="py-line">                        <tt class="py-keyword">return</tt> <tt class="py-name">indata</tt> </tt>
+<a name="L146"></a><tt class="py-lineno">146</tt>  <tt class="py-line">         </tt>
+<a name="L147"></a><tt class="py-lineno">147</tt>  <tt class="py-line">        <tt class="py-keyword">if</tt> <tt class="py-name">outdata</tt><tt class="py-op">:</tt> </tt>
+<a name="L148"></a><tt class="py-lineno">148</tt>  <tt class="py-line">            <tt class="py-name">outdata</tt> <tt class="py-op">=</tt> <tt class="py-name">tuple</tt><tt class="py-op">(</tt><tt class="py-name">outdata</tt><tt class="py-op">)</tt> </tt>
+<a name="L149"></a><tt class="py-lineno">149</tt>  <tt class="py-line">            <tt class="py-comment">#print 'outdata:'</tt> </tt>
+<a name="L150"></a><tt class="py-lineno">150</tt>  <tt class="py-line">            <tt class="py-comment">#print outdata</tt> </tt>
+<a name="L151"></a><tt class="py-lineno">151</tt>  <tt class="py-line">            <tt class="py-keyword">return</tt> <tt class="py-name">outdata</tt> </tt>
+<a name="L152"></a><tt class="py-lineno">152</tt>  <tt class="py-line">        <tt class="py-keyword">else</tt><tt class="py-op">:</tt> </tt>
+<a name="L153"></a><tt class="py-lineno">153</tt>  <tt class="py-line">            <tt class="py-comment">#print 'returning SQL indata'</tt> </tt>
+<a name="L154"></a><tt class="py-lineno">154</tt>  <tt class="py-line">            <tt class="py-keyword">return</tt> <tt class="py-name">indata</tt> </tt>
+</div></div><a name="L155"></a><tt class="py-lineno">155</tt>  <tt class="py-line">                     </tt>
+<a name="L156"></a><tt class="py-lineno">156</tt>  <tt class="py-line">         </tt>
+<a name="L157"></a><tt class="py-lineno">157</tt>  <tt class="py-line">         </tt>
+<a name="L158"></a><tt class="py-lineno">158</tt>  <tt class="py-line">         </tt>
+<a name="L159"></a><tt class="py-lineno">159</tt>  <tt class="py-line">         </tt>
+<a name="L160"></a><tt class="py-lineno">160</tt>  <tt class="py-line">         </tt>
+<a name="L161"></a><tt class="py-lineno">161</tt>  <tt class="py-line"><tt class="py-comment">#===============================================================================</tt> </tt>
+<a name="L162"></a><tt class="py-lineno">162</tt>  <tt class="py-line"><tt class="py-comment"># # from StackOverflow</tt> </tt>
+<a name="L163"></a><tt class="py-lineno">163</tt>  <tt class="py-line"><tt class="py-comment"># from MySQLdb.cursors import Cursor</tt> </tt>
+<a name="L164"></a><tt class="py-lineno">164</tt>  <tt class="py-line"><tt class="py-comment"># old_execute = Cursor.execute</tt> </tt>
+<a name="L165"></a><tt class="py-lineno">165</tt>  <tt class="py-line"><tt class="py-comment"># def new_execute(self, query, args):</tt> </tt>
+<a name="L166"></a><tt class="py-lineno">166</tt>  <tt class="py-line"><tt class="py-comment">#   return old_execute(self, query.replace("?", "%s"), args) </tt> </tt>
+<a name="L167"></a><tt class="py-lineno">167</tt>  <tt class="py-line"><tt class="py-comment"># Cursor.execute = new_execute</tt> </tt>
+<a name="L168"></a><tt class="py-lineno">168</tt>  <tt class="py-line"><tt class="py-comment">#===============================================================================</tt> </tt>
+<a name="L169"></a><tt class="py-lineno">169</tt>  <tt class="py-line"> </tt><script type="text/javascript">
+<!--
+expandto(location.href);
+// -->
+</script>
+</pre>
+<br />
+<!-- ==================== NAVIGATION BAR ==================== -->
+<table class="navbar" border="0" width="100%" cellpadding="0"
+       bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="middle">
+
+  <!-- Tree link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="module-tree.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Index link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="identifier-index.html">Indices</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Help link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Project homepage -->
+      <th class="navbar" align="right" width="100%">
+        <table border="0" cellpadding="0" cellspacing="0">
+          <tr><th class="navbar" align="center"
+            >assetmanager-api</th>
+          </tr></table></th>
+  </tr>
+</table>
+<table border="0" cellpadding="0" cellspacing="0" width="100%%">
+  <tr>
+    <td align="left" class="footer">
+    Generated by Epydoc 3.0.1 on Sun Dec 11 14:54:18 2011
+    </td>
+    <td align="right" class="footer">
+      <a target="mainFrame" href="http://epydoc.sourceforge.net"
+        >http://epydoc.sourceforge.net</a>
+    </td>
+  </tr>
+</table>
+
+<script type="text/javascript">
+  <!--
+  // Private objects are initially displayed (because if
+  // javascript is turned off then we want them to be
+  // visible); but by default, we want to hide them.  So hide
+  // them unless we have a cookie that says to show them.
+  checkCookie();
+  // -->
+</script>
+</body>
+</html>

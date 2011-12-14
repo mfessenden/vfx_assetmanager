@@ -1,6 +1,6 @@
 # assetmanager.maya by Michael Fessenden (c) 2011
 #
-# v0.31
+# v0.34
 #
 # Description :
 # -------------
@@ -9,7 +9,7 @@
 #
 # Version History :
 # -----------------
-# v0.31:
+# v0.34:
 # - development version
 
 
@@ -17,10 +17,9 @@ import posixpath as pp
 import os
 import maya.cmds as mc
 from assetmanager.lib.system import Output
-from assetmanager.maya.system import buildSystemModulesTab
 
-__version__ = '0.31'
-__lastupdate__ = 'Dec 07 2011'
+__version__ = '0.34'
+__lastupdate__ = 'Dec 13 2011'
 __repr__ = 'vfx-assetmanager.maya'
 __modulecontents__ = ['assets', 'attrs', '*autoLoad', 'browser', 'optVars', 'system', 'optVars', 'proj', 'system']
 namespace = __name__

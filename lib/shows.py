@@ -1,6 +1,6 @@
 # shows.py by Michael Fessenden (c) 2011
 #
-# v0.32
+# v0.34
 #
 # Description :
 # -------------
@@ -9,7 +9,10 @@
 #
 # Version History :
 # -----------------
-# v0.32:
+# v0.34:
+# - development version
+#
+# v0.33:
 # - added the 'update' method for the ShowObj
 #
 # v0.29:
@@ -41,8 +44,8 @@ import re
 from assetmanager.lib.sql import Query
 from assetmanager.lib.system import Output
 
-__version__ = '0.32'
-__lastupdate__ = 'Dec 11 2011'
+__version__ = '0.34'
+__lastupdate__ = 'Dec 13 2011'
 __amlib__ = 'shows'
 __status__ = 'design'
 
