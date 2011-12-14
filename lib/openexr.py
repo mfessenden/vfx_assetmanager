@@ -18,7 +18,10 @@
 # - 
 # ----------------------------------------------------------------------------
 
-import OpenEXR
+try:
+    import OpenEXR
+except:
+    pass
 import Imath
 #import Image
 import sys
@@ -56,7 +59,6 @@ if __name__ == "__main__":
 #channels = OpenEXR.InputFile('file.exr').header('channels')
 
 def returnEXRChannels(img):
-    img = 'Z:/projects/mario/shots/mario002/maya/light/work/michael/images/mario002_lgt_v002.0001.exr'
     rgbChan = []
     xyChan = []
     channels = OpenEXR.InputFile(img).header('channels')

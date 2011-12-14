@@ -1,6 +1,6 @@
 # system.py by Michael Fessenden (c) 2011
 #
-# v0.34
+# v0.35
 #
 # Description :
 # -------------
@@ -9,7 +9,7 @@
 #
 # Version History :
 # -----------------
-# v0.34:
+# v0.35:
 # - development version
 #
 # v0.33:
@@ -34,7 +34,7 @@ import inspect
 from xml.etree import ElementTree as ET
 from xml.dom import minidom
 
-__version__ = '0.34'
+__version__ = '0.35'
 __lastupdate__ = 'Dec 13 2011'
 __repr__ = 'assetmanager.lib.system'
 __amlib__ = 'system'
@@ -129,6 +129,7 @@ def returnLoadedModules():
             pass
 
 def returnUsername():
+    """ returns the username, based on OS"""
     if sys.platform == "win32":
         cmd="USERNAME"
     elif sys.platform == "linux2":
@@ -203,7 +204,7 @@ class StudioPrefs(object):
         self.shotGlobals = self.defineShotGlobals()
     
     def __repr__(self):
-        """ string represntation of the object"""
+        """ string representation of the object"""
         pass
     
     def defineShotGlobals(self):

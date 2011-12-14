@@ -139,12 +139,10 @@ def transferShaders(obj1, obj2):
     pass
 
 def createNode(nodetype, dagpath):
-    # get a list
+    """ given a dagpath and a nodetype, creates the node on the given path"""
+    # get a list from the dag
     daglist = dagpath.split('|')
     depth = len(daglist)
-
-    # get the first object
-    
     curobj = ''
     for i in range(0,depth):                  
         if i is not depth-1:
@@ -154,22 +152,17 @@ def createNode(nodetype, dagpath):
                     if not curobj:                        
                         curobj = mc.createNode('transform', name=daglist[i])
                         curobj = mc.ls(curobj, long=True)[0]
-                        #print 'creating transform: "%s"' % curobj
                     else:
                         curobj = mc.createNode('transform', name=daglist[i], parent=curobj)
                         curobj = mc.ls(curobj, long=True)[0]
-                        #print 'creating transform: "%s"' % curobj
                 except RuntimeError:
                     pass
             else:
                 # the current object does exists, so just set the current object to it
-                #print '**object exists: %s, skipping...' % (curobj + '|' + daglist[i])
                 curobj = (curobj + '|' + daglist[i])
         else:            
             finalObj = mc.createNode(nodetype, name = daglist[i], parent = curobj)
             finalObj = mc.ls(finalObj, long=True)[0]
-            #print 'creating final node: %s' % finalObj
-            #print '\n'
             return finalObj
 
             
@@ -191,4 +184,5 @@ def attributeExists(attr, node):
          if( attr == i ):
            return 1
        return 0
+   
    
